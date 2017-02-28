@@ -1,4 +1,4 @@
-= Document Title
+= new title
 
 [source,java]
 ----
@@ -11,7 +11,7 @@ public partial class Employee :IClonable<Employee>, IVersionable<Employee>{
     Has ES : True
     Has Status : False
     */
-----
+
 
 /// <summary>
 /// Creates a shallow copy of the Employee
@@ -51,4 +51,4 @@ public partial class Employee :IClonable<Employee>, IVersionable<Employee>{
     	EmployeePartySeqID = value;
     	}
     }
----
+----
