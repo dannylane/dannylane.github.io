@@ -1,0 +1,54 @@
+= Document Title
+
+[source,java]
+----
+public partial class Employee :IClonable<Employee>, IVersionable<Employee>{
+/*
+    Template debug info
+    ---------------------
+    Has PK ending with 'SeqID' : True
+    Has EE : True
+    Has ES : True
+    Has Status : False
+    */
+----
+
+/// <summary>
+/// Creates a shallow copy of the Employee
+    /// Only copies primative types, should not copy primary keys
+    /// </summary>
+    /// <returns>A new clone</returns>
+    public Employee Clone(){
+    	return new Employee{
+        EID = EID,
+    	PartyID = PartyID,
+    	PreferredRoleID = PreferredRoleID,
+    	AccessExpiryDate = AccessExpiryDate,
+    	EffectiveStartDate = EffectiveStartDate,
+    	EffectiveEndDate = EffectiveEndDate,
+    	    };
+    }
+    
+    /// <summary>
+    /// Updates the Employee with values from the source
+    /// Only updates primative types, should not update primary keys
+    /// </summary>
+    public void Update(Employee source){
+        this.EID = source.EID;
+    	this.PartyID = source.PartyID;
+    	this.PreferredRoleID = source.PreferredRoleID;
+    	this.AccessExpiryDate = source.AccessExpiryDate;
+    	this.EffectiveStartDate = source.EffectiveStartDate;
+    	this.EffectiveEndDate = source.EffectiveEndDate;
+    	}
+    
+    
+    public int SeqId{
+    	get{
+    	return EmployeePartySeqID;
+    	}
+    	set{
+    	EmployeePartySeqID = value;
+    	}
+    }
+---
