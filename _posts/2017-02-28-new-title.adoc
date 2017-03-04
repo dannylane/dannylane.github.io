@@ -1,6 +1,6 @@
 = new title
 
-[source, tt]
+[source, t4]
 ----
 <#+ 
 // Note: You can call this method from the outside of the template,
