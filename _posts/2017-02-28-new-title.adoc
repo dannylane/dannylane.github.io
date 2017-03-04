@@ -2,11 +2,11 @@
 
 [source, c#]
 ----
-<#+void // <1>
+<#+void 
 Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
 var members = ((EntityType)entity).DeclaredProperties;
 
-var pk = entity.KeyMembers.Any(k=>k.Name.EndsWith("SeqID"));
+var pk = entity.KeyMembers.Any(k=>k.Name.EndsWith("SeqID")); // <1>
 var hasEE = members.Any(m=>m.Name=="EffectiveEndDate");
 var hasES = members.Any(m=>m.Name=="EffectiveStartDate");
 var hasStatusID = members.Any(m=>m.Name=="StatusID");
