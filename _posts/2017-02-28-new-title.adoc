@@ -3,6 +3,7 @@
 [source, c#]
 ----
 // <1>
+<2>
 <#+void 
 Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
 var members = ((EntityType)entity).DeclaredProperties;
@@ -17,7 +18,7 @@ var hasStatusID = members.Any(m=>m.Name=="StatusID");
 <#+}#>
 ----
 <1> eee
-
+<2> 333
 [source, c#]
 ----
 <#@ template language="C#" debug="false" hostspecific="true"#>
