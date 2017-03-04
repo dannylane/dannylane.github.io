@@ -1,5 +1,83 @@
 = new title
 
+[source, tt]
+----
+<#+ 
+// Note: You can call this method from the outside of the template,
+//       please add parameters as needed.    
+// To include this templaate just drag this file on another editor
+// then call this.Render_DDS_Methods()
+void Render_DDS_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
+var members = ((EntityType)entity).DeclaredProperties;
+
+var pk = entity.KeyMembers.Any(k=>k.Name.EndsWith("SeqID"));
+var pkName = entity.KeyMembers.Where(k=>k.Name.EndsWith("SeqID"));       
+var hasEE = members.Any(m=>m.Name=="EffectiveEndDate");
+var hasES = members.Any(m=>m.Name=="EffectiveStartDate");
+var hasStatusID = members.Any(m=>m.Name=="StatusID");
+#>
+/*
+Template debug info
+__________________
+Has PK ending with 'SeqID' : <#= pk #>
+Has EE : <#= hasEE #>
+Has ES : <#= hasES #>
+Has Status : <#= hasStatusID #>
+*/
+
+/// <summary>
+/// Creates a shallow copy of the <#=entity.Name #>
+/// Only copies primative types, should not copy primary keys
+/// </summary>
+/// <returns>A new clone</returns>
+public <#=entity.Name #> Clone(){
+	return new <#= entity.Name #>{
+    <#+ 
+    for(var i = 0; i < members.Count(); i++){
+        if(!entity.KeyMembers.Any(k=>k.Name == members[i].Name)){
+		#>
+<#=members[i].Name#> = <#=members[i].Name#>,
+	<#+}
+    }#>
+    };
+}
+
+/// <summary>
+/// Updates the <#=entity.Name #> with values from the source
+/// Only updates primative types, should not update primary keys
+/// </summary>
+public void Update(<#=entity.Name #> source){
+    <#+for(var i = 0; i < members.Count(); i++){
+        if(!entity.KeyMembers.Any(k=>k.Name == members[i].Name)){#>
+		this.<#=members[i].Name#> = source.<#=members[i].Name#>;
+	<#+}
+    }#>
+}
+
+<#+if(!pk || !hasEE || !hasES)
+{
+return;
+}
+
+var pkNameValue = pkName.First().Name; // pkName would be null before the last if
+// Only do the version method if the class is versionable
+#>
+
+public int SeqId{
+	get{
+	return <#=pkNameValue #>;
+	}
+	set{
+	<#=pkNameValue#> = value;
+	}
+}
+
+<#+
+}
+#>
+
+----
+
 [source,c#]
 ----
 public partial class Employee :IClonable<Employee>, IVersionable<Employee>{
