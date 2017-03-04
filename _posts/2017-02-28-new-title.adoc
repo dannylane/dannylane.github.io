@@ -2,7 +2,7 @@
 
 [source, c#]
 ----
-<#+void //<1>
+<#+void // <1>
 Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
 var members = ((EntityType)entity).DeclaredProperties;
 
