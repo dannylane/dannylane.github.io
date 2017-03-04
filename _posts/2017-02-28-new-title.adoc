@@ -2,6 +2,30 @@
 
 [source, c#]
 ----
+<#+void <1> Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
+var members = ((EntityType)entity).DeclaredProperties;
+
+var pk = entity.KeyMembers.Any(k=>k.Name.EndsWith("SeqID"));
+var hasEE = members.Any(m=>m.Name=="EffectiveEndDate");
+var hasES = members.Any(m=>m.Name=="EffectiveStartDate");
+var hasStatusID = members.Any(m=>m.Name=="StatusID");
+	   //TODO no need for clonable if versionable.
+#>
+:IClonable<<#=entity.Name #>><#+if(hasEE && hasES){#>, IVersionable<<#=entity.Name #>><#+}#><#+if(pk && hasEE && hasES && hasStatusID){#>, IStatusEntity<#+}#>
+<#+}#>
+----
+
+[source, c#]
+----
+<#@ template language="C#" debug="false" hostspecific="true"#>
+<#@ include file="EF6.Utility.CS.ttinclude"#>
+<#@ include file="EntityVersion.ttinclude" #>
+<#@ 
+ output extension=".cs"#>
+ ----
+
+[source, c#]
+----
 <#+ 
 // Note: You can call this method from the outside of the template,
 //       please add parameters as needed.    
