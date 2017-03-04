@@ -15,6 +15,7 @@ var hasStatusID = members.Any(m=>m.Name=="StatusID");
 :IClonable<<#=entity.Name #>><#+if(hasEE && hasES){#>, IVersionable<<#=entity.Name #>><#+}#><#+if(pk && hasEE && hasES && hasStatusID){#>, IStatusEntity<#+}#>
 <#+}#>
 ----
+<1> eee
 
 [source, c#]
 ----
