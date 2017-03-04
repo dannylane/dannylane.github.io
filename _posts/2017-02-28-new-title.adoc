@@ -1,5 +1,12 @@
 = new title
 
+
+[source, c#]
+----
+var int e = 1; <1>
+----
+<1> 33
+
 [source, c#]
 ----
 // <1>
