@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Untitled RSS Feed]]></title><description><![CDATA[Untitled RSS Feed]]></description><link>https://dannylane.github.io</link><generator>RSS for Node</generator><lastBuildDate>Sat, 04 Mar 2017 16:23:15 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[new title]]></title><description><![CDATA[<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#"><i class="conum" data-value="1"></i><b>(1)</b>
+<i class="conum" data-value="2"></i><b>(2)</b>
+&lt;#+void
+Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
+var members = ((EntityType)entity).DeclaredProperties;
+
+var pk = entity.KeyMembers.Any(k=&gt;k.Name.EndsWith("SeqID"));
+var hasEE = members.Any(m=&gt;m.Name=="EffectiveEndDate");
+var hasES = members.Any(m=&gt;m.Name=="EffectiveStartDate");
+var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
+	   //TODO no need for clonable if versionable.
+#&gt;
+:IClonable&lt;&lt;#=entity.Name #&gt;&gt;&lt;#+if(hasEE &amp;&amp; hasES){#&gt;, IVersionable&lt;&lt;#=entity.Name #&gt;&gt;&lt;#+}#&gt;&lt;#+if(pk &amp;&amp; hasEE &amp;&amp; hasES &amp;&amp; hasStatusID){#&gt;, IStatusEntity&lt;#+}#&gt;
+&lt;#+}#&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>eee</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>333</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;#@ template language="C#" debug="false" hostspecific="true"#&gt;
+&lt;#@ include file="EF6.Utility.CS.ttinclude"#&gt;
+&lt;#@ include file="EntityVersion.ttinclude" #&gt;
+&lt;#@
+ output extension=".cs"#&gt;
+ ----
+
+[source, c#]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>&lt;#+
+void Render_DDS_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
+var members = ((EntityType)entity).DeclaredProperties;</p>
+</div>
+<div class="paragraph">
+<p>var pk = entity.KeyMembers.Any(k&#8658;k.Name.EndsWith("SeqID"));
+var pkName = entity.KeyMembers.Where(k&#8658;k.Name.EndsWith("SeqID"));
+var hasEE = members.Any(m&#8658;m.Name=="EffectiveEndDate");
+var hasES = members.Any(m&#8658;m.Name=="EffectiveStartDate");
+var hasStatusID = members.Any(m&#8658;m.Name=="StatusID");
+#&gt;
+/*
+Template debug info</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Has PK ending with 'SeqID' : &lt;#= pk <mark>&gt;
+Has EE : &lt;</mark>= hasEE <mark>&gt;
+Has ES : &lt;</mark>= hasES <mark>&gt;
+Has Status : &lt;</mark>= hasStatusID #&gt;
+*/</p>
+</div>
+<div class="paragraph">
+<p>/// &lt;summary&gt;
+/// Creates a shallow copy of the &lt;#=entity.Name <mark>&gt;
+/// Only copies primative types, should not copy primary keys
+/// &lt;/summary&gt;
+/// &lt;returns&gt;A new clone&lt;/returns&gt;
+public &lt;</mark>=entity.Name <mark>&gt; Clone(){
+	return new &lt;</mark>= entity.Name <mark>&gt;{
+    &lt;</mark>+
+    for(var i = 0; i &lt; members.Count(); i+){
+        if(!entity.KeyMembers.Any(k=&gt;k.Name == members[i].Name)){
+		#&gt;
+&lt;#=members[i].Name#&gt; = &lt;#=members[i].Name#&gt;,
+	&lt;#}
+    }#&gt;
+    };
+}</p>
+</div>
+<div class="paragraph">
+<p>/// &lt;summary&gt;
+/// Updates the &lt;#=entity.Name <mark>&gt; with values from the source
+/// Only updates primative types, should not update primary keys
+/// &lt;/summary&gt;
+public void Update(&lt;</mark>=entity.Name <mark>&gt; source){
+    &lt;</mark>for(var i = 0; i &lt; members.Count(); i+){
+        if(!entity.KeyMembers.Any(k&#8658;k.Name == members[i].Name)){<mark>&gt;
+		this.&lt;</mark>=members[i].Name#&gt; = source.&lt;#=members[i].Name#&gt;;
+	&lt;#+}
+    }#&gt;
+}</p>
+</div>
+<div class="paragraph">
+<p>&lt;#+if(!pk || !hasEE || !hasES)
+{
+return;
+}</p>
+</div>
+<div class="paragraph">
+<p>var pkNameValue = pkName.First().Name; // pkName would be null before the last if
+#&gt;</p>
+</div>
+<div class="paragraph">
+<p>public int SeqId{
+	get{
+	return &lt;#=pkNameValue <mark>&gt;;
+	}
+	set{
+	&lt;</mark>=pkNameValue#&gt; = value;
+	}
+}</p>
+</div>
+<div class="paragraph">
+<p>&lt;#+
+}
+#&gt;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[source,c#]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>public partial class Employee :IClonable&lt;Employee&gt;, IVersionable&lt;Employee&gt;{
+/*
+    Template debug info
+    ---------------------
+    Has PK ending with 'SeqID' : True
+    Has EE : True
+    Has ES : True
+    Has Status : False
+    */</p>
+</div>
+<div class="paragraph">
+<p>/// &lt;summary&gt;
+/// Creates a shallow copy of the Employee
+    /// Only copies primative types, should not copy primary keys
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;A new clone&lt;/returns&gt;
+    public Employee Clone(){
+    	return new Employee{
+        EID = EID,
+    	PartyID = PartyID,
+    	PreferredRoleID = PreferredRoleID,
+    	AccessExpiryDate = AccessExpiryDate,
+    	EffectiveStartDate = EffectiveStartDate,
+    	EffectiveEndDate = EffectiveEndDate,
+    	    };
+    }</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>/// &lt;summary&gt;
+/// Updates the Employee with values from the source
+/// Only updates primative types, should not update primary keys
+/// &lt;/summary&gt;
+public void Update(Employee source){
+    this.EID = source.EID;
+	this.PartyID = source.PartyID;
+	this.PreferredRoleID = source.PreferredRoleID;
+	this.AccessExpiryDate = source.AccessExpiryDate;
+	this.EffectiveStartDate = source.EffectiveStartDate;
+	this.EffectiveEndDate = source.EffectiveEndDate;
+	}</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>public int SeqId{
+	get{
+	return EmployeePartySeqID;
+	}
+	set{
+	EmployeePartySeqID = value;
+	}
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre></pre>
+</div>
+</div>
+</blockquote>
+</div>]]></description><link>https://dannylane.github.io/2017/02/28/new-title.html</link><guid isPermaLink="true">https://dannylane.github.io/2017/02/28/new-title.html</guid><dc:creator><![CDATA[Danny Lane]]></dc:creator><pubDate>Tue, 28 Feb 2017 00:00:00 GMT</pubDate></item></channel></rss>
