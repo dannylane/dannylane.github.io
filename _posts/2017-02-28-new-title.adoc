@@ -1,6 +1,6 @@
 = new title
 
-[source,java]
+[source,c#]
 ----
 public partial class Employee :IClonable<Employee>, IVersionable<Employee>{
 /*
