@@ -5,10 +5,10 @@
     "branch": "master"
   },
   "site": {
-    "cover": "image::https://github.com/dannylane/dannylane.github.io/images/zoom.png"
+    "cover": "https://github.com/dannylane/dannylane.github.io/images/zoom.png"
   },
   "socialnetwork": {},
   "theme": {
-    "name": "ichi"
+    "name": "roon"
   }
 }
