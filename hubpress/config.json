@@ -4,7 +4,9 @@
     "repositoryName": "dannylane.github.io",
     "branch": "master"
   },
-  "site": {},
+  "site": {
+    "cover": "zoom.png"
+  },
   "socialnetwork": {},
   "theme": {
     "name": "ghostium"
