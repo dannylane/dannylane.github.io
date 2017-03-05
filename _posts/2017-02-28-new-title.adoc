@@ -14,13 +14,13 @@ end
 <3> Response block
 ll
 
-[source, c#]
+[source,c#]
 ----
 var int e = 1; <1>
 ----
 <1> 33
 
-[source, c#]
+[source,c#]
 ----
 // <1>
 <2>
