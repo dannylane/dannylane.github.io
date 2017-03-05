@@ -5,10 +5,10 @@
     "branch": "master"
   },
   "site": {
-    "cover": "https://github.com/dannylane/dannylane.github.io/images/zoom.png"
+    "cover": "https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png"
   },
   "socialnetwork": {},
   "theme": {
-    "name": "uno"
+    "name": "casper"
   }
 }
