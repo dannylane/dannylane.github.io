@@ -1,7 +1,7 @@
 = new title
-:hp-image:t4.png
+:hp-image:/t4/t4.png
 
-
+d
 [source,c#]
 ----
 // <1>
