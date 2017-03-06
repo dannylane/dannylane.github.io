@@ -1,24 +1,6 @@
 = new title
+:hp-image:t4.png
 
-ll
-[source,ruby]
-----
-require 'sinatra' <1>
-
-get '/hi' do <2> <3>
-  "Hello World!"
-end
-----
-<1> Library import
-<2> URL mapping
-<3> Response block
-ll
-
-[source,c#]
-----
-var int e = 1; <1>
-----
-<1> 33
 
 [source,c#]
 ----
