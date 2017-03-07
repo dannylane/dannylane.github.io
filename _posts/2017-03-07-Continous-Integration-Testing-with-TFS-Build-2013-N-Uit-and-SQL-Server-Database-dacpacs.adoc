@@ -131,6 +131,8 @@ public abstract class IntegrationTestBase
         }
 ----
 
+The optional script per test fixture relied on a convention where the name of the sql file to be run matches the name of the test fixture class.
+
 [source,c#]
 ----
         protected void RunOptionalScript()
