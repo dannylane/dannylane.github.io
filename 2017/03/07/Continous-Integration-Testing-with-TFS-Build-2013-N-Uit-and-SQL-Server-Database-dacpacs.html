@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488926639734" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488928200480" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/03/07/Continous-Integration-Testing-with-TFS-Build-2013-N-Uit-and-SQL-Server-Database-dacpacs.html" />
     <meta name="referrer" content="origin" />
@@ -142,16 +142,13 @@ null
 <p>I spent some time recently working on a .NET project where the DB schema was put in place before application development began. The schema was complex, simple entities were spread across multiple tables, there were requirements around maintaining in-table historical versions of almost all records. There were very few simple insert/updates in the application, all DB actions became a series of versioning records and realigning historical records to maintain historical integrity.</p>
 </div>
 <div class="paragraph">
-<p>It quickly became apparent that the DB access code was going to be an area of high risk and that we should take steps to mitigate that risk by including the DB interaction in our automated tests.
+<p>It quickly became apparent that the DB access code was going to be an area of high risk and that we should take steps to mitigate that risk by including the DB interaction in our automated tests.<br>
 I have a strong preference for unit tests over integration tests, I like to mock the elements that are outside the boundary of my control. It&#8217;s good to test how an application responds to external failures, like an unavailable service or a DB timeout, but you need to be able to assume that the services you consume or the DB technology you are building on is reasonably reliable. I like the image of the testing pyramid that puts the focus on unit tests, some integration tests and a few end to end tests.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="https://2.bp.blogspot.com/-YTzv_O4TnkA/VTgexlumP1I/AAAAAAAAAJ8/57-rnwyvP6g/s1600/image02.png" alt="triangle" width="400" height="100">
+<a class="image" href="https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html"><img src="https://2.bp.blogspot.com/-YTzv_O4TnkA/VTgexlumP1I/AAAAAAAAAJ8/57-rnwyvP6g/s1600/image02.png" alt="triangle" width="200" height="200"></a>
 </div>
-</div>
-<div class="paragraph">
-<p><a href="https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html" class="bare">https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html</a></p>
 </div>
 <div class="paragraph">
 <p>The risk for this project was that we needed to be sure that we were persisting our data in a predictable manner, we needed to verify we weren&#8217;t loosing information among all the versioning madness that was going on.</p>
@@ -163,162 +160,158 @@ I have a strong preference for unit tests over integration tests, I like to mock
 <p>I strongly felt that the integration tests should be spinning up an instance of the DB schema, prepopulating data, executing the tests and then cleaning up the db. I believed facilitating this flow of testing in the project would greatly reduce the potential for errors around the db code.</p>
 </div>
 <div class="paragraph">
-<p>There was a SQL Server Database project used to manage the schema but the schema was in one big drop/create script instead of the desired state folder structure like below.
-It was my first time working with a DB project like this and I found it incredibly useful.
+<p>There was a SQL Server Database project used to manage the schema but the schema was in one big drop/create script instead of the desired state folder structure like below.<br>
+It was my first time working with a DB project like this and I found it incredibly useful.<br>
 It takes most of the pain out of deploying schema changes, you still need to be able to handle data migrations but I&#8217;ll talk about that another day.</p>
 </div>
-<div class="paragraph">
-<p>pasted2
-The build artifact produced by the DB project is a dacpac file. The dacpac includes some manual scripts that we use to prepopulate a new DB with setup/reference data. Deploying the dacpac before the integration test will also give us test data to work with in our tests.</p>
-</div>
-<div class="paragraph">
-<p>I setup an IntegrationTestSetUp class that has the [SetUpFixture] attribute
-<a href="https://github.com/nunit/docs/wiki/SetUpFixture-Attribute" class="bare">https://github.com/nunit/docs/wiki/SetUpFixture-Attribute</a>
-""A SetUpFixture outside of any namespace provides SetUp and TearDown for the entire assembly.</p>
-</div>
-<div class="paragraph">
-<p>pasted4
-pasted5</p>
-</div>
-<div class="literalblock">
+<div class="imageblock">
 <div class="content">
-<pre>public void RunBeforeAnyTests()
-{
-    TestLogSetup.Logger();
-    log = LogManager.GetLogger(GetType());
-    dbName = GenerateDbName();
-    DeployDacpac(dbName);
-    UpdateConfig(dbName);
-}</pre>
+<img src="https://dannylane.github.io/images/ci/1.project.png" alt="1.project.png">
 </div>
+<div class="title">Figure 1. DB project structure</div>
+</div>
+<div class="paragraph">
+<p>The build artifact produced by the DB project is a dacpac file. The dacpac includes some manual scripts that we use to prepopulate a new DB with setup/reference data. Deploying the dacpac before the integration test will also give us test data to work with in our tests.</p>
+</div>
+<div class="paragraph">
+<p>I setup an <code>IntegrationTestSetUp</code> class that has the <code>[SetUpFixture]</code> attribute from <a href="https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html">nunit</a></p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>A SetUpFixture outside of any namespace provides SetUp and TearDown for the entire assembly.</p>
+</div>
+</blockquote>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/ci/2.setupfixture.png" alt="2.setupfixture.png">
+</div>
+<div class="title">Figure 2. <code>SetUpFixture</code> per class library</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/ci/3.setup.png" alt="3.setup.png">
+</div>
+<div class="title">Figure 3. <code>SetUp</code> method runs once per class library</div>
 </div>
 <div class="paragraph">
 <p>The setup method deployed a version of the dacpac to the localdb server.</p>
 </div>
 <div class="paragraph">
-<p>The code for deploying the dacpac looks like this
-        private const string ConnectionStringFormat = "data source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connection Timeout=60;Database={0}";</p>
+<p>The code for deploying the dacpac looks like this</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>private static void DeployDacpac(string databaseName)
+<pre class="highlight"><code class="language-c#" data-lang="c#">private const string ConnectionStringFormat = "data source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connection Timeout=60;Database={0}";
+
+private static void DeployDacpac(string databaseName)
 {
-    var start = DateTime.UtcNow;</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>var path = AppDomain.CurrentDomain.BaseDirectory + "\\..\\..\\..\\..\\DDS.Database\\bin\\Output\\DDS.Database.dacpac";</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>// The dacpac is in a different location on the build server.
-if (!File.Exists(path))
-{
-    path = AppDomain.CurrentDomain.BaseDirectory + "\\DDS.Database.dacpac";
-}
-try
-{
-    var service = new DacServices(GetConnectionString(databaseName));
-    service.Message += (sender, args) =&gt; log.Debug(args.Message); //Console.WriteLine(args.Message);
-    service.ProgressChanged += (sender, args) =&gt; log.Debug(args.Message);//Console.WriteLine(args.Message);
-    var dacpac = DacPackage.Load(path);
-    var ddo = new DacDeployOptions
+    var start = DateTime.UtcNow;
+
+    var path = AppDomain.CurrentDomain.BaseDirectory + "\\..\\..\\..\\..\\DDS.Database\\bin\\Output\\DDS.Database.dacpac";
+
+    // The dacpac is in a different location on the build server.
+    if (!File.Exists(path))
     {
-        BlockOnPossibleDataLoss = false,
-        CreateNewDatabase = true
-    };
-    ddo.SqlCommandVariableValues.Add("DeploymentEnvironment", "IntegrationTest");
-    service.Deploy(dacpac, databaseName, true, ddo);
-}
-catch (Exception ex)
-{
-    log.Debug(String.Format(ex.Message));
-    log.Debug(String.Format(ex.InnerException != null ? ex.InnerException.Message : "No inner exception"));
-}</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>            log.Debug(String.Format("DB spin up in " + DateTime.UtcNow.Subtract(start).Seconds));
-        }
-pasted6
-NOTE the output of the messages</pre>
+        path = AppDomain.CurrentDomain.BaseDirectory + "\\DDS.Database.dacpac";
+    }
+    try
+    {
+        var service = new DacServices(GetConnectionString(databaseName));
+        service.Message += (sender, args) =&gt; log.Debug(args.Message); //Console.WriteLine(args.Message);
+        service.ProgressChanged += (sender, args) =&gt; log.Debug(args.Message);//Console.WriteLine(args.Message);
+        var dacpac = DacPackage.Load(path);
+        var ddo = new DacDeployOptions
+                {
+                    BlockOnPossibleDataLoss = false,
+                    CreateNewDatabase = true
+                };
+        ddo.SqlCommandVariableValues.Add("DeploymentEnvironment", "IntegrationTest");
+        service.Deploy(dacpac, databaseName, true, ddo);
+    }
+       catch (Exception ex)
+            {
+                log.Debug(String.Format(ex.Message));
+                log.Debug(String.Format(ex.InnerException != null ? ex.InnerException.Message : "No inner exception"));
+            }
+
+        log.Debug(String.Format("DB spin up in " + DateTime.UtcNow.Subtract(start).Seconds));
+        }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The connection string was generated randomly for each assembly so that all the tests within an assembly would be using a dedicated DB.
+<p>The <code>DacServices</code> class is used to deploy the dacpac.</p>
+</div>
+<div class="paragraph">
+<p>The connection string was generated randomly for each assembly so that all the tests within an assembly would be using a dedicated DB.<br>
 It would have been easy to make the DB spin up and down per test but that would have slowed the builds considerably.</p>
 </div>
 <div class="paragraph">
-<p>This test SetUp class was linked to all other integration test projects so the&#8230;&#8203;.</p>
+<p>This <code>IntegrationSetUp</code> class was linked to all other integration test projects so that the code didn&#8217;t need to be duplicated, it was written once and then linked to the other projects.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/ci/5.linkedsetup.png" alt="5.linkedsetup.png">
+</div>
+<div class="title">Figure 4. The <code>IntegrationSetUp</code> is a linked file in the test projects.</div>
 </div>
 <div class="paragraph">
-<p>pasted3
-The tear down method deleted the db
-pasted8</p>
+<p>The tear down method deleted the db:</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>private const string DropDatabaseCommand = "USE master " +
-                                          "IF DB_ID('{0}') IS NOT NULL " +
-                                          "BEGIN " +
-                                          "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE " +
-                                          "DROP DATABASE {0} " +
-                                          "END";</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>private static void DropDatabase(string connectionString, string databaseName)
-{
-    int result;
-    log.Debug(String.Format("Dropping database {0}", databaseName));
-    using (var connection = new SqlConnection(connectionString))
-    {
-        connection.Open();
-        using (var cmd = new SqlCommand(string.Format(DropDatabaseCommand, databaseName), connection))
+<pre class="highlight"><code class="language-c#" data-lang="c#"> private const string DropDatabaseCommand = "USE master " +
+                                           "IF DB_ID('{0}') IS NOT NULL " +
+                                           "BEGIN " +
+                                           "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE " +
+                                           "DROP DATABASE {0} " +
+                                           "END";
+
+        private static void DropDatabase(string connectionString, string databaseName)
         {
-            result = cmd.ExecuteNonQuery();
-        }
-    }
-    log.Debug(String.Format("Dropped database {0}. {1}", databaseName, result));
-}</pre>
+            int result;
+            log.Debug(String.Format("Dropping database {0}", databaseName));
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var cmd = new SqlCommand(string.Format(DropDatabaseCommand, databaseName), connection))
+                {
+                    result = cmd.ExecuteNonQuery();
+                }
+            }
+            log.Debug(String.Format("Dropped database {0}. {1}", databaseName, result));
+        }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>I also wrote a base test class that allowed developers to setup sql scripts for inserting data that is specific to the test they are working on. This allows us to isolate data that will be  manipulated by a test from impacting on other test data.</p>
+<p>I also wrote a base test class that allowed developers to setup SQL scripts for inserting data that is specific to the test they are working on. This allows us to isolate data that will be  manipulated by a test from impacting on other test data.</p>
 </div>
-<div class="paragraph">
-<p>public abstract class IntegrationTestBase</p>
-</div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>[TestFixtureSetUp]
-public void SetUp()
-{
-    TestLogSetup.Logger();
-    RunManualScripts();
-    RunOptionalScript();
-}</pre>
+<pre class="highlight"><code class="language-c#" data-lang="c#">public abstract class IntegrationTestBase
+
+        [TestFixtureSetUp]
+        public void SetUp()
+        {
+            TestLogSetup.Logger();
+            RunManualScripts();
+            RunOptionalScript();
+        }</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>pasted7</p>
-</div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>        protected void RunOptionalScript()
+<pre class="highlight"><code class="language-c#" data-lang="c#">        protected void RunOptionalScript()
         {
             var thisType = GetType();
             var path = string.Format(@"{0}\{2}.Scripts\{1}.sql", AppDomain.CurrentDomain.BaseDirectory, thisType.Name, thisType.Assembly.GetName().Name);
             RunScriptFromPath(path);
-        }
-pasted9
-pasted9
-We had 4 integration test libraries so on each build 4 different DBs would be provisioned.</pre>
+        }</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>We had 4 integration test libraries so on each build 4 different DBs would be provisioned.</p>
 </div>
 <div class="paragraph">
 <p>Having the tests setup like this allowed us a lot of flexibility when writing our integration tests, most importantly it became easy for the team to write the tests in a reproducible manner and abstracted away all the heavy lifting that needed to be done around the DB setups.</p>
@@ -354,7 +347,7 @@ We had 4 integration test libraries so on each build 4 different DBs would be pr
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488926639734"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488928200480"></script>
     
 
 </body>
