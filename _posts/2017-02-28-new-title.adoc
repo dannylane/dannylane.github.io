@@ -1,5 +1,6 @@
 = new title
-image::zoom.png[]
+;;;
+dd image:zoom.png[]
 
 d
 [source,c#]
