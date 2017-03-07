@@ -1,5 +1,6 @@
 = Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs
 :hardbreaks:
+:published_at:2017-03-15
 
 I spent some time recently working on a .NET project where the DB schema was put in place before application development began. The schema was complex, simple entities were spread across multiple tables, there were requirements around maintaining in-table historical versions of almost all records. There were very few simple insert/updates in the application, all DB actions became a series of versioning records and realigning historical records to maintain historical integrity.
 
