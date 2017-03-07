@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Untitled RSS Feed]]></title><description><![CDATA[Untitled RSS Feed]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Untitled RSS Feed</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 07 Mar 2017 15:34:47 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Extending EntityFramework Generated Model Classes With T4 Templates]]></title><description><![CDATA[<div class="paragraph">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Untitled RSS Feed]]></title><description><![CDATA[Untitled RSS Feed]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Untitled RSS Feed</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 07 Mar 2017 22:17:56 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Extending EntityFramework Generated Model Classes With T4 Templates]]></title><description><![CDATA[<div class="paragraph">
 <p>I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.<br>
-I updated the generated code to render a generic interface if specific properties exist on the model. 2 helper methods to  (<code>Clone</code> &amp; <code>Version</code>)</p>
+I updated the generated code to render a generic interface if specific properties exist on the model. 2 helper methods (<code>Clone</code> &amp; <code>Update</code>) were added to the models and were regenerated whenever the model was refreshed.</p>
 </div>
 <div id="img-project" class="imageblock">
 <div class="content">
@@ -9,7 +9,7 @@ I updated the generated code to render a generic interface if specific propertie
 <div class="title">Figure 1. EnttityVersion.ttinclude</div>
 </div>
 <div class="paragraph">
-<p>I added new templating content as methods exposed in a .ttinclude file.</p>
+<p>I added new templating content as methods exposed in a <code>.ttinclude</code> file.</p>
 </div>
 <div id="img-t4" class="imageblock">
 <div class="content">
@@ -18,10 +18,10 @@ I updated the generated code to render a generic interface if specific propertie
 <div class="title">Figure 2. Add reference to .ttinclude file</div>
 </div>
 <div class="paragraph">
-<p>Using DB first EF and generating the model from the existing schema uses a t4 template, model1.tt by default.</p>
+<p>Using DB first EF and generating the model from the existing schema uses a t4 template, <code>model1.tt</code> by default.</p>
 </div>
 <div class="paragraph">
-<p>The .ttinclude file can be added to the top of this template and every model class that is generated will include the new content you define.</p>
+<p>The <code>.ttinclude</code> file can be added to the top of this template and every model class that is generated will include the new content you define.</p>
 </div>
 <div class="listingblock">
 <div class="title">RenderInterfaces template method</div>
@@ -49,7 +49,7 @@ var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
 </div>
 </div>
 <div class="paragraph">
-<p>The second method in the <code>.ttinclude</code> file is the one that adds the <code>Clone</code> and <code>Update</code> methods.</p>
+<p>The second method in the <code>.ttinclude</code> template is the one that adds the <code>Clone</code> and <code>Update</code> methods.</p>
 </div>
 <div class="listingblock">
 <div class="title"><code>Clone</code> and <code>Update</code> method templates</div>
@@ -148,4 +148,7 @@ public void Update(&lt;#=entity.Name #&gt; source){
     	}
     }</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Customizing the generated templates is pretty simple once you get the hang of the default template. I definitely prefer a code first approach, unfortunately that wasn&#8217;t an option on this project. While having to work with the <code>edmx</code> isn&#8217;t my preference, it is useful to know how to fine tune the models if needs be.</p>
 </div>]]></description><link>https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html</link><guid isPermaLink="true">https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html</guid><category><![CDATA[C#]]></category><category><![CDATA[ T4]]></category><category><![CDATA[ EF]]></category><dc:creator><![CDATA[Danny Lane]]></dc:creator><pubDate>Tue, 28 Feb 2017 00:00:00 GMT</pubDate></item></channel></rss>
