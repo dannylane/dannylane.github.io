@@ -85,6 +85,7 @@ public void Update(<#=entity.Name #> source){
 .Calling the `Render_Methods` helper method
 image::t4/render.png[]
 
+The result of updating the interfaces and adding the `Clone` & `Update` methods at the start of the class template looks like this:
 [source,c#]
 ----
 public partial class Employee :IClonable<Employee>, IVersionable<Employee>{
