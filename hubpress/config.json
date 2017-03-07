@@ -5,7 +5,10 @@
     "branch": "master"
   },
   "site": {
-    "cover": "https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png"
+    "description": "Notes To Self",
+    "logo": "https://avatars3.githubusercontent.com/u/250202?v=3",
+    "cover": "https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png",
+    "googleAnalytics": "UA-93232110-1"
   },
   "socialnetwork": {
     "twitter": "https://twitter.com/_danny_lane_",
