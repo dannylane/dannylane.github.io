@@ -1,5 +1,5 @@
 = new title
-:hp-image:zoom.png
+image::/t4/t4.png
 
 d
 [source,c#]
