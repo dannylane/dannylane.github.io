@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs - </title>
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <meta name="description" content="">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs">
+    <meta name="twitter:description" content="">
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs">
+    <meta property="og:description" content="">
+
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
+
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488926639734" />
+
+    <link rel="canonical" href="https://dannylane.github.io/2017/03/07/Continous-Integration-Testing-with-TFS-Build-2013-N-Uit-and-SQL-Server-Database-dacpacs.html" />
+    <meta name="referrer" content="origin" />
+    
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs" />
+    <meta property="og:description" content="I spent some time recently working on a .NET project where the DB schema was put in place before application development began. The schema was complex, simple entities were spread across multiple tables, there were requirements around maintaining in-table historical versions of almost all records. There were very few simple" />
+    <meta property="og:url" content="https://dannylane.github.io/2017/03/07/Continous-Integration-Testing-with-TFS-Build-2013-N-Uit-and-SQL-Server-Database-dacpacs.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs" />
+    <meta name="twitter:description" content="I spent some time recently working on a .NET project where the DB schema was put in place before application development began. The schema was complex, simple entities were spread across multiple tables, there were requirements around maintaining in-table historical versions of almost all records. There were very few simple" />
+    <meta name="twitter:url" content="https://dannylane.github.io/2017/03/07/Continous-Integration-Testing-with-TFS-Build-2013-N-Uit-and-SQL-Server-Database-dacpacs.html" />
+    
+    <script type="application/ld+json">
+null
+    </script>
+
+    <meta name="generator" content="HubPress" />
+    <link rel="alternate" type="application/rss+xml" title="" href="https://dannylane.github.io/rss/" />
+
+</head>
+<body class="post-template no-js">
+
+    <span class="mobile btn-mobile-menu">
+        <i class="icon icon-list btn-mobile-menu__icon"></i>
+        <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+
+    <header class="panel-cover panel-cover--collapsed " style="background-image: url(https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png)">
+      <div class="panel-main">
+    
+        <div class="panel-main__inner panel-inverted">
+        <div class="panel-main__content">
+    
+            <h1 class="panel-cover__title panel-title"><a href="https://dannylane.github.io" title="link to homepage for "></a></h1>
+            <hr class="panel-cover__divider" />
+            <p class="panel-cover__description"></p>
+            <hr class="panel-cover__divider panel-cover__divider--secondary" />
+    
+            <div class="navigation-wrapper">
+    
+              <nav class="cover-navigation cover-navigation--primary">
+                <ul class="navigation">
+                  <li class="navigation__item"><a href="https://dannylane.github.io/#blog" title="link to  blog" class="blog-button">Blog</a></li>
+                </ul>
+              </nav>
+    
+              
+              
+              <nav class="cover-navigation navigation--social">
+                <ul class="navigation">
+              
+              
+                  <!-- Twitter -->
+                  <li class="navigation__item">
+                    <a href="https://twitter.com/_danny_lane_" title="Twitter account">
+                      <i class='icon icon-social-twitter'></i>
+                      <span class="label">Twitter</span>
+                    </a>
+                  </li>
+              
+              
+                  <!-- Github -->
+                  <li class="navigation__item">
+                    <a href="https://github.com/dannylane" title="Github account">
+                      <i class='icon icon-social-github'></i>
+                      <span class="label">Github</span>
+                    </a>
+                  </li>
+                  </li>
+              
+              
+              
+              
+                  <!-- LinkedIn -->
+                  <li class="navigation__item">
+                    <a href="https://www.linkedin.com/in/dannylane/" title="LinkedIn account">
+                      <i class='icon icon-social-linkedin'></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+              
+              
+                </ul>
+              </nav>
+              
+    
+            </div>
+    
+          </div>
+    
+        </div>
+    
+        <div class="panel-cover--overlay"></div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            
+
+  <article class="post-container post-container--single">
+
+    <header class="post-header">
+      <div class="post-meta">
+        <time datetime="07 Mar 2017" class="post-meta__date date">07 Mar 2017</time> &#8226; <span class="post-meta__tags tags"></span>
+        <span class="post-meta__author author"><img src="https://avatars3.githubusercontent.com/u/250202?v&#x3D;3" alt="profile image for Danny Lane" class="avatar post-meta__avatar" /> by Danny Lane</span>
+      </div>
+      <h1 class="post-title">Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs</h1>
+    </header>
+
+    <section class="post">
+      <div class="paragraph">
+<p>I spent some time recently working on a .NET project where the DB schema was put in place before application development began. The schema was complex, simple entities were spread across multiple tables, there were requirements around maintaining in-table historical versions of almost all records. There were very few simple insert/updates in the application, all DB actions became a series of versioning records and realigning historical records to maintain historical integrity.</p>
+</div>
+<div class="paragraph">
+<p>It quickly became apparent that the DB access code was going to be an area of high risk and that we should take steps to mitigate that risk by including the DB interaction in our automated tests.
+I have a strong preference for unit tests over integration tests, I like to mock the elements that are outside the boundary of my control. It&#8217;s good to test how an application responds to external failures, like an unavailable service or a DB timeout, but you need to be able to assume that the services you consume or the DB technology you are building on is reasonably reliable. I like the image of the testing pyramid that puts the focus on unit tests, some integration tests and a few end to end tests.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://2.bp.blogspot.com/-YTzv_O4TnkA/VTgexlumP1I/AAAAAAAAAJ8/57-rnwyvP6g/s1600/image02.png" alt="triangle" width="400" height="100">
+</div>
+</div>
+<div class="paragraph">
+<p><a href="https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html" class="bare">https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html</a></p>
+</div>
+<div class="paragraph">
+<p>The risk for this project was that we needed to be sure that we were persisting our data in a predictable manner, we needed to verify we weren&#8217;t loosing information among all the versioning madness that was going on.</p>
+</div>
+<div class="paragraph">
+<p>When I joined the project there were a few unit and integration tests in place. The test weren&#8217;t run in a CI build (there was no build yet, it was early enough in the project) so when I ran the tests on day 1 they all failed. The integration tests were going to the development database, none of them were setting up their own data and there was no cleanup/tear-down happening. 2 test runs at the same time would most likely fail.</p>
+</div>
+<div class="paragraph">
+<p>I strongly felt that the integration tests should be spinning up an instance of the DB schema, prepopulating data, executing the tests and then cleaning up the db. I believed facilitating this flow of testing in the project would greatly reduce the potential for errors around the db code.</p>
+</div>
+<div class="paragraph">
+<p>There was a SQL Server Database project used to manage the schema but the schema was in one big drop/create script instead of the desired state folder structure like below.
+It was my first time working with a DB project like this and I found it incredibly useful.
+It takes most of the pain out of deploying schema changes, you still need to be able to handle data migrations but I&#8217;ll talk about that another day.</p>
+</div>
+<div class="paragraph">
+<p>pasted2
+The build artifact produced by the DB project is a dacpac file. The dacpac includes some manual scripts that we use to prepopulate a new DB with setup/reference data. Deploying the dacpac before the integration test will also give us test data to work with in our tests.</p>
+</div>
+<div class="paragraph">
+<p>I setup an IntegrationTestSetUp class that has the [SetUpFixture] attribute
+<a href="https://github.com/nunit/docs/wiki/SetUpFixture-Attribute" class="bare">https://github.com/nunit/docs/wiki/SetUpFixture-Attribute</a>
+""A SetUpFixture outside of any namespace provides SetUp and TearDown for the entire assembly.</p>
+</div>
+<div class="paragraph">
+<p>pasted4
+pasted5</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>public void RunBeforeAnyTests()
+{
+    TestLogSetup.Logger();
+    log = LogManager.GetLogger(GetType());
+    dbName = GenerateDbName();
+    DeployDacpac(dbName);
+    UpdateConfig(dbName);
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The setup method deployed a version of the dacpac to the localdb server.</p>
+</div>
+<div class="paragraph">
+<p>The code for deploying the dacpac looks like this
+        private const string ConnectionStringFormat = "data source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connection Timeout=60;Database={0}";</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>private static void DeployDacpac(string databaseName)
+{
+    var start = DateTime.UtcNow;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>var path = AppDomain.CurrentDomain.BaseDirectory + "\\..\\..\\..\\..\\DDS.Database\\bin\\Output\\DDS.Database.dacpac";</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>// The dacpac is in a different location on the build server.
+if (!File.Exists(path))
+{
+    path = AppDomain.CurrentDomain.BaseDirectory + "\\DDS.Database.dacpac";
+}
+try
+{
+    var service = new DacServices(GetConnectionString(databaseName));
+    service.Message += (sender, args) =&gt; log.Debug(args.Message); //Console.WriteLine(args.Message);
+    service.ProgressChanged += (sender, args) =&gt; log.Debug(args.Message);//Console.WriteLine(args.Message);
+    var dacpac = DacPackage.Load(path);
+    var ddo = new DacDeployOptions
+    {
+        BlockOnPossibleDataLoss = false,
+        CreateNewDatabase = true
+    };
+    ddo.SqlCommandVariableValues.Add("DeploymentEnvironment", "IntegrationTest");
+    service.Deploy(dacpac, databaseName, true, ddo);
+}
+catch (Exception ex)
+{
+    log.Debug(String.Format(ex.Message));
+    log.Debug(String.Format(ex.InnerException != null ? ex.InnerException.Message : "No inner exception"));
+}</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>            log.Debug(String.Format("DB spin up in " + DateTime.UtcNow.Subtract(start).Seconds));
+        }
+pasted6
+NOTE the output of the messages</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The connection string was generated randomly for each assembly so that all the tests within an assembly would be using a dedicated DB.
+It would have been easy to make the DB spin up and down per test but that would have slowed the builds considerably.</p>
+</div>
+<div class="paragraph">
+<p>This test SetUp class was linked to all other integration test projects so the&#8230;&#8203;.</p>
+</div>
+<div class="paragraph">
+<p>pasted3
+The tear down method deleted the db
+pasted8</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>private const string DropDatabaseCommand = "USE master " +
+                                          "IF DB_ID('{0}') IS NOT NULL " +
+                                          "BEGIN " +
+                                          "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE " +
+                                          "DROP DATABASE {0} " +
+                                          "END";</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>private static void DropDatabase(string connectionString, string databaseName)
+{
+    int result;
+    log.Debug(String.Format("Dropping database {0}", databaseName));
+    using (var connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        using (var cmd = new SqlCommand(string.Format(DropDatabaseCommand, databaseName), connection))
+        {
+            result = cmd.ExecuteNonQuery();
+        }
+    }
+    log.Debug(String.Format("Dropped database {0}. {1}", databaseName, result));
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I also wrote a base test class that allowed developers to setup sql scripts for inserting data that is specific to the test they are working on. This allows us to isolate data that will be  manipulated by a test from impacting on other test data.</p>
+</div>
+<div class="paragraph">
+<p>public abstract class IntegrationTestBase</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[TestFixtureSetUp]
+public void SetUp()
+{
+    TestLogSetup.Logger();
+    RunManualScripts();
+    RunOptionalScript();
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>pasted7</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>        protected void RunOptionalScript()
+        {
+            var thisType = GetType();
+            var path = string.Format(@"{0}\{2}.Scripts\{1}.sql", AppDomain.CurrentDomain.BaseDirectory, thisType.Name, thisType.Assembly.GetName().Name);
+            RunScriptFromPath(path);
+        }
+pasted9
+pasted9
+We had 4 integration test libraries so on each build 4 different DBs would be provisioned.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Having the tests setup like this allowed us a lot of flexibility when writing our integration tests, most importantly it became easy for the team to write the tests in a reproducible manner and abstracted away all the heavy lifting that needed to be done around the DB setups.</p>
+</div>
+<div class="paragraph">
+<p>Having such a reliance on integration tests like this isn&#8217;t something I&#8217;d like to use again but it&#8217;s nice to know the option exists if I need it.</p>
+</div>
+    </section>
+
+  </article>
+
+
+
+
+            <footer class="footer">
+                <span class="footer__copyright">&copy; 2017. All rights reserved.</span>
+                <span class="footer__copyright"><a href="http://uno.daleanthony.com" title="link to page for Uno Ghost theme">Uno theme</a> by <a href="http://daleanthony.com" title="link to website for Dale-Anthony">Dale-Anthony</a></span>
+                <span class="footer__copyright">Proudly published with <a href="http://hubpress.io" title="link to Hubpress website">Hubpress</a></span>
+            </footer>
+        </div>
+    </div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
+      <script type="text/javascript">
+        jQuery( document ).ready(function() {
+          // change date with ago
+          jQuery('ago.ago').each(function(){
+            var element = jQuery(this).parent();
+            element.html( moment(element.text()).fromNow());
+          });
+        });
+
+        hljs.initHighlightingOnLoad();
+      </script>
+
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488926639734"></script>
+    
+
+</body>
+</html>
