@@ -42,30 +42,14 @@ The `Render_Interfaces` method checks for specific columns/properties on the mod
 <#=codeStringGenerator.EntityClassOpening(entity)#> <#this.Render_Interfaces(entity);#> 
 ----
 
+The second method in the `.ttinclude` file is the one that adds the `Clone` and `Update` methods.
+
+[app-clone]
 [source, c#]
+.`Clone` and `Update` method templates
 ----
 <#+ 
-// Note: You can call this method from the outside of the template,
-//       please add parameters as needed.    
-// To include this templaate just drag this file on another editor
-// then call this.Render_DDS_Methods()
-void Render_DDS_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
-var members = ((EntityType)entity).DeclaredProperties;
-
-var pk = entity.KeyMembers.Any(k=>k.Name.EndsWith("SeqID"));
-var pkName = entity.KeyMembers.Where(k=>k.Name.EndsWith("SeqID"));       
-var hasEE = members.Any(m=>m.Name=="EffectiveEndDate");
-var hasES = members.Any(m=>m.Name=="EffectiveStartDate");
-var hasStatusID = members.Any(m=>m.Name=="StatusID");
-#>
-/*
-Template debug info
-__________________
-Has PK ending with 'SeqID' : <#= pk #>
-Has EE : <#= hasEE #>
-Has ES : <#= hasES #>
-Has Status : <#= hasStatusID #>
-*/
+void Render_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
 
 /// <summary>
 /// Creates a shallow copy of the <#=entity.Name #>
@@ -95,30 +79,11 @@ public void Update(<#=entity.Name #> source){
 	<#+}
     }#>
 }
-
-<#+if(!pk || !hasEE || !hasES)
-{
-return;
-}
-
-var pkNameValue = pkName.First().Name; // pkName would be null before the last if
-// Only do the version method if the class is versionable
-#>
-
-public int SeqId{
-	get{
-	return <#=pkNameValue #>;
-	}
-	set{
-	<#=pkNameValue#> = value;
-	}
-}
-
-<#+
-}
-#>
-
 ----
+
+[[img-t4]]
+.Calling the `Render_Methods` helper method
+image::t4/render.png[]
 
 [source,c#]
 ----
