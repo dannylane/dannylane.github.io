@@ -25,18 +25,22 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488889796787" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488892667828" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
     <meta name="referrer" content="origin" />
     
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Extending EntityFramework Generated Model Classes With T4 Templates" />
-    <meta property="og:description" content="d (1) (2) &amp;lt;#+void Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){ var members &#x3D; ((EntityType)entity).DeclaredProperties; var pk &#x3D; entity.KeyMembers.Any(k&#x3D;&amp;gt;k.Name.EndsWith(&quot;SeqID&quot;)); var hasEE &#x3D; members.Any(m&#x3D;&amp;gt;m.Name&#x3D;&#x3D;&quot;EffectiveEndDate&quot;); var hasES &#x3D; members.Any(m&#x3D;&amp;gt;m.Name&#x3D;&#x3D;&quot;EffectiveStartDate&quot;" />
+    <meta property="og:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. Figure 1. EnttityVersion.ttinclude I added new templating content as methods exposed in a .ttinclude file." />
     <meta property="og:url" content="https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
+    <meta property="article:tag" content="C#" />
+    <meta property="article:tag" content=" T4" />
+    <meta property="article:tag" content=" EF" />
+    
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Extending EntityFramework Generated Model Classes With T4 Templates" />
-    <meta name="twitter:description" content="d (1) (2) &amp;lt;#+void Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){ var members &#x3D; ((EntityType)entity).DeclaredProperties; var pk &#x3D; entity.KeyMembers.Any(k&#x3D;&amp;gt;k.Name.EndsWith(&quot;SeqID&quot;)); var hasEE &#x3D; members.Any(m&#x3D;&amp;gt;m.Name&#x3D;&#x3D;&quot;EffectiveEndDate&quot;); var hasES &#x3D; members.Any(m&#x3D;&amp;gt;m.Name&#x3D;&#x3D;&quot;EffectiveStartDate&quot;" />
+    <meta name="twitter:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. Figure 1. EnttityVersion.ttinclude I added new templating content as methods exposed in a .ttinclude file." />
     <meta name="twitter:url" content="https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
     
     <script type="application/ld+json">
@@ -47,7 +51,7 @@ null
     <link rel="alternate" type="application/rss+xml" title="" href="https://dannylane.github.io/rss/" />
 
 </head>
-<body class="post-template no-js">
+<body class="post-template tag-C tag-T4 tag-EF no-js">
 
     <span class="mobile btn-mobile-menu">
         <i class="icon icon-list btn-mobile-menu__icon"></i>
@@ -131,148 +135,142 @@ null
 
     <header class="post-header">
       <div class="post-meta">
-        <time datetime="28 Feb 2017" class="post-meta__date date">28 Feb 2017</time> &#8226; <span class="post-meta__tags tags"></span>
+        <time datetime="28 Feb 2017" class="post-meta__date date">28 Feb 2017</time> &#8226; <span class="post-meta__tags tags">on <a href="https://dannylane.github.io/tag/C/">C#</a>, <a href="https://dannylane.github.io/tag/T4/"> T4</a>, <a href="https://dannylane.github.io/tag/EF/"> EF</a></span>
         <span class="post-meta__author author"><img src="https://avatars3.githubusercontent.com/u/250202?v&#x3D;3" alt="profile image for Danny Lane" class="avatar post-meta__avatar" /> by Danny Lane</span>
       </div>
       <h1 class="post-title">Extending EntityFramework Generated Model Classes With T4 Templates</h1>
     </header>
 
-    <section class="post">
+    <section class="post tag-C tag-T4 tag-EF">
       <div class="paragraph">
-<p><span class="image"><img src="https://dannylane.github.io/images/t4/t4.png" alt="t4.png"></span></p>
+<p>I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.</p>
+</div>
+<div id="img-project" class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/t4/project.png" alt="project.png">
+</div>
+<div class="title">Figure 1. EnttityVersion.ttinclude</div>
 </div>
 <div class="paragraph">
-<p>d</p>
+<p>I added new templating content as methods exposed in a .ttinclude file.</p>
+</div>
+<div id="img-t4" class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/t4/t4.png" alt="t4.png">
+</div>
+<div class="title">Figure 2. Add reference to .ttinclude file</div>
+</div>
+<div class="paragraph">
+<p>Using DB first EF and generating the model from the existing schema uses a t4 template, model1.tt by default.</p>
+</div>
+<div class="paragraph">
+<p>The .ttinclude file can be added to the top of this template and every model class that is generated will include the new content you define.</p>
 </div>
 <div class="listingblock">
+<div class="title">RenderInterfaces template method</div>
 <div class="content">
-<pre class="highlight"><code class="language-c#" data-lang="c#"><i class="conum" data-value="1"></i><b>(1)</b>
-<i class="conum" data-value="2"></i><b>(2)</b>
-&lt;#+void
-Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
+<pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#+void Render_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
 var members = ((EntityType)entity).DeclaredProperties;
 
 var pk = entity.KeyMembers.Any(k=&gt;k.Name.EndsWith("SeqID"));
 var hasEE = members.Any(m=&gt;m.Name=="EffectiveEndDate");
 var hasES = members.Any(m=&gt;m.Name=="EffectiveStartDate");
 var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
-	   //TODO no need for clonable if versionable.
+
 #&gt;
 :IClonable&lt;&lt;#=entity.Name #&gt;&gt;&lt;#+if(hasEE &amp;&amp; hasES){#&gt;, IVersionable&lt;&lt;#=entity.Name #&gt;&gt;&lt;#+}#&gt;&lt;#+if(pk &amp;&amp; hasEE &amp;&amp; hasES &amp;&amp; hasStatusID){#&gt;, IStatusEntity&lt;#+}#&gt;
 &lt;#+}#&gt;</code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>eee</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>333</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>The <code>Render_Interfaces</code> method checks for specific columns/properties on the model and if they exist (<code>SeqID</code>, <code>EffectiveEndDate</code> &amp; <code>EffectiveStartDate</code>) then the generated class should have the interfaces <code>IVersionable&lt;T&gt;</code> &amp; <code>IClonable&lt;T&gt;</code></p>
+</div>
+<div class="listingblock">
+<div class="title">Adding the <code>Render_Interfaces</code> method to the Model1.tt file</div>
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#=codeStringGenerator.EntityClassOpening(entity)#&gt; &lt;#this.Render_Interfaces(entity);#&gt;</code></pre>
+</div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>&lt;#@ template language="C#" debug="false" hostspecific="true"#&gt;
-&lt;#@ include file="EF6.Utility.CS.ttinclude"#&gt;
-&lt;#@ include file="EntityVersion.ttinclude" #&gt;
-&lt;#@
- output extension=".cs"#&gt;
- ----
-
-[source, c#]</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>&lt;#+
+<pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#+
+// Note: You can call this method from the outside of the template,
+//       please add parameters as needed.
+// To include this templaate just drag this file on another editor
+// then call this.Render_DDS_Methods()
 void Render_DDS_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
-var members = ((EntityType)entity).DeclaredProperties;</p>
-</div>
-<div class="paragraph">
-<p>var pk = entity.KeyMembers.Any(k&#8658;k.Name.EndsWith("SeqID"));
-var pkName = entity.KeyMembers.Where(k&#8658;k.Name.EndsWith("SeqID"));
-var hasEE = members.Any(m&#8658;m.Name=="EffectiveEndDate");
-var hasES = members.Any(m&#8658;m.Name=="EffectiveStartDate");
-var hasStatusID = members.Any(m&#8658;m.Name=="StatusID");
+var members = ((EntityType)entity).DeclaredProperties;
+
+var pk = entity.KeyMembers.Any(k=&gt;k.Name.EndsWith("SeqID"));
+var pkName = entity.KeyMembers.Where(k=&gt;k.Name.EndsWith("SeqID"));
+var hasEE = members.Any(m=&gt;m.Name=="EffectiveEndDate");
+var hasES = members.Any(m=&gt;m.Name=="EffectiveStartDate");
+var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
 #&gt;
 /*
-Template debug info</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-<div class="paragraph">
-<p>Has PK ending with 'SeqID' : &lt;#= pk <mark>&gt;
-Has EE : &lt;</mark>= hasEE <mark>&gt;
-Has ES : &lt;</mark>= hasES <mark>&gt;
-Has Status : &lt;</mark>= hasStatusID #&gt;
-*/</p>
-</div>
-<div class="paragraph">
-<p>/// &lt;summary&gt;
-/// Creates a shallow copy of the &lt;#=entity.Name <mark>&gt;
+Template debug info
+__________________
+Has PK ending with 'SeqID' : &lt;#= pk #&gt;
+Has EE : &lt;#= hasEE #&gt;
+Has ES : &lt;#= hasES #&gt;
+Has Status : &lt;#= hasStatusID #&gt;
+*/
+
+/// &lt;summary&gt;
+/// Creates a shallow copy of the &lt;#=entity.Name #&gt;
 /// Only copies primative types, should not copy primary keys
 /// &lt;/summary&gt;
 /// &lt;returns&gt;A new clone&lt;/returns&gt;
-public &lt;</mark>=entity.Name <mark>&gt; Clone(){
-	return new &lt;</mark>= entity.Name <mark>&gt;{
-    &lt;</mark>+
-    for(var i = 0; i &lt; members.Count(); i+){
+public &lt;#=entity.Name #&gt; Clone(){
+	return new &lt;#= entity.Name #&gt;{
+    &lt;#+
+    for(var i = 0; i &lt; members.Count(); i++){
         if(!entity.KeyMembers.Any(k=&gt;k.Name == members[i].Name)){
 		#&gt;
 &lt;#=members[i].Name#&gt; = &lt;#=members[i].Name#&gt;,
-	&lt;#}
-    }#&gt;
-    };
-}</p>
-</div>
-<div class="paragraph">
-<p>/// &lt;summary&gt;
-/// Updates the &lt;#=entity.Name <mark>&gt; with values from the source
-/// Only updates primative types, should not update primary keys
-/// &lt;/summary&gt;
-public void Update(&lt;</mark>=entity.Name <mark>&gt; source){
-    &lt;</mark>for(var i = 0; i &lt; members.Count(); i+){
-        if(!entity.KeyMembers.Any(k&#8658;k.Name == members[i].Name)){<mark>&gt;
-		this.&lt;</mark>=members[i].Name#&gt; = source.&lt;#=members[i].Name#&gt;;
 	&lt;#+}
     }#&gt;
-}</p>
-</div>
-<div class="paragraph">
-<p>&lt;#+if(!pk || !hasEE || !hasES)
+    };
+}
+
+/// &lt;summary&gt;
+/// Updates the &lt;#=entity.Name #&gt; with values from the source
+/// Only updates primative types, should not update primary keys
+/// &lt;/summary&gt;
+public void Update(&lt;#=entity.Name #&gt; source){
+    &lt;#+for(var i = 0; i &lt; members.Count(); i++){
+        if(!entity.KeyMembers.Any(k=&gt;k.Name == members[i].Name)){#&gt;
+		this.&lt;#=members[i].Name#&gt; = source.&lt;#=members[i].Name#&gt;;
+	&lt;#+}
+    }#&gt;
+}
+
+&lt;#+if(!pk || !hasEE || !hasES)
 {
 return;
-}</p>
-</div>
-<div class="paragraph">
-<p>var pkNameValue = pkName.First().Name; // pkName would be null before the last if
-#&gt;</p>
-</div>
-<div class="paragraph">
-<p>public int SeqId{
+}
+
+var pkNameValue = pkName.First().Name; // pkName would be null before the last if
+// Only do the version method if the class is versionable
+#&gt;
+
+public int SeqId{
 	get{
-	return &lt;#=pkNameValue <mark>&gt;;
+	return &lt;#=pkNameValue #&gt;;
 	}
 	set{
-	&lt;</mark>=pkNameValue#&gt; = value;
+	&lt;#=pkNameValue#&gt; = value;
 	}
-}</p>
-</div>
-<div class="paragraph">
-<p>&lt;#+
 }
-#&gt;</p>
+
+&lt;#+
+}
+#&gt;</code></pre>
+</div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[source,c#]</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>public partial class Employee :IClonable&lt;Employee&gt;, IVersionable&lt;Employee&gt;{
+<pre class="highlight"><code class="language-c#" data-lang="c#">public partial class Employee :IClonable&lt;Employee&gt;, IVersionable&lt;Employee&gt;{
 /*
     Template debug info
     ---------------------
@@ -280,10 +278,10 @@ return;
     Has EE : True
     Has ES : True
     Has Status : False
-    */</p>
-</div>
-<div class="paragraph">
-<p>/// &lt;summary&gt;
+    */
+
+
+/// &lt;summary&gt;
 /// Creates a shallow copy of the Employee
     /// Only copies primative types, should not copy primary keys
     /// &lt;/summary&gt;
@@ -297,42 +295,31 @@ return;
     	EffectiveStartDate = EffectiveStartDate,
     	EffectiveEndDate = EffectiveEndDate,
     	    };
-    }</p>
+    }
+
+    /// &lt;summary&gt;
+    /// Updates the Employee with values from the source
+    /// Only updates primative types, should not update primary keys
+    /// &lt;/summary&gt;
+    public void Update(Employee source){
+        this.EID = source.EID;
+    	this.PartyID = source.PartyID;
+    	this.PreferredRoleID = source.PreferredRoleID;
+    	this.AccessExpiryDate = source.AccessExpiryDate;
+    	this.EffectiveStartDate = source.EffectiveStartDate;
+    	this.EffectiveEndDate = source.EffectiveEndDate;
+    	}
+
+
+    public int SeqId{
+    	get{
+    	return EmployeePartySeqID;
+    	}
+    	set{
+    	EmployeePartySeqID = value;
+    	}
+    }</code></pre>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>/// &lt;summary&gt;
-/// Updates the Employee with values from the source
-/// Only updates primative types, should not update primary keys
-/// &lt;/summary&gt;
-public void Update(Employee source){
-    this.EID = source.EID;
-	this.PartyID = source.PartyID;
-	this.PreferredRoleID = source.PreferredRoleID;
-	this.AccessExpiryDate = source.AccessExpiryDate;
-	this.EffectiveStartDate = source.EffectiveStartDate;
-	this.EffectiveEndDate = source.EffectiveEndDate;
-	}</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>public int SeqId{
-	get{
-	return EmployeePartySeqID;
-	}
-	set{
-	EmployeePartySeqID = value;
-	}
-}</pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre></pre>
-</div>
-</div>
-</blockquote>
 </div>
     </section>
 
@@ -362,7 +349,7 @@ public void Update(Employee source){
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488889796787"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488892667828"></script>
     
 
 </body>
