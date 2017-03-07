@@ -1,35 +1,46 @@
-= Extending EntityFramework Generated Model Classes With T4 Templates 
+= Extending EntityFramework Generated Model Classes With T4 Templates
+:hp-tags: C#, T4, EF
 
-image:t4/t4.png[]
+I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.
 
-d
+[[img-project]]
+.EnttityVersion.ttinclude
+image::t4/project.png[]
+
+I added new templating content as methods exposed in a .ttinclude file.
+
+[[img-t4]]
+.Add reference to .ttinclude file
+image::t4/t4.png[]
+
+Using DB first EF and generating the model from the existing schema uses a t4 template, model1.tt by default.
+
+The .ttinclude file can be added to the top of this template and every model class that is generated will include the new content you define.
+
+[app-l]
 [source,c#]
+.RenderInterfaces template method
 ----
-// <1>
-<2>
-<#+void 
-Render_DDS_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
+<#+void Render_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){            
 var members = ((EntityType)entity).DeclaredProperties;
 
 var pk = entity.KeyMembers.Any(k=>k.Name.EndsWith("SeqID")); 
 var hasEE = members.Any(m=>m.Name=="EffectiveEndDate");
 var hasES = members.Any(m=>m.Name=="EffectiveStartDate");
 var hasStatusID = members.Any(m=>m.Name=="StatusID");
-	   //TODO no need for clonable if versionable.
+
 #>
 :IClonable<<#=entity.Name #>><#+if(hasEE && hasES){#>, IVersionable<<#=entity.Name #>><#+}#><#+if(pk && hasEE && hasES && hasStatusID){#>, IStatusEntity<#+}#>
 <#+}#>
 ----
-<1> eee
-<2> 333
+The `Render_Interfaces` method checks for specific columns/properties on the model and if they exist (`SeqID`, `EffectiveEndDate` & `EffectiveStartDate`) then the generated class should have the interfaces `IVersionable<T>` & `IClonable<T>`
+
+
 [source, c#]
+.Adding the `Render_Interfaces` method to the Model1.tt file
 ----
-<#@ template language="C#" debug="false" hostspecific="true"#>
-<#@ include file="EF6.Utility.CS.ttinclude"#>
-<#@ include file="EntityVersion.ttinclude" #>
-<#@ 
- output extension=".cs"#>
- ----
+<#=codeStringGenerator.EntityClassOpening(entity)#> <#this.Render_Interfaces(entity);#> 
+----
 
 [source, c#]
 ----
