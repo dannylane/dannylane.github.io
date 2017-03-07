@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Extending EntityFramework Generated Model Classes With T4 Templates - </title>
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <meta name="description" content="">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Extending EntityFramework Generated Model Classes With T4 Templates">
+    <meta name="twitter:description" content="">
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Extending EntityFramework Generated Model Classes With T4 Templates">
+    <meta property="og:description" content="">
+
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
+
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488928561004" />
+
+    <link rel="canonical" href="https://dannylane.github.io/2017/03/07/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
+    <meta name="referrer" content="origin" />
+    
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Extending EntityFramework Generated Model Classes With T4 Templates" />
+    <meta property="og:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. I updated the generated code to render a generic interface if specific properties exist on the" />
+    <meta property="og:url" content="https://dannylane.github.io/2017/03/07/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
+    <meta property="article:tag" content="C#" />
+    <meta property="article:tag" content=" T4" />
+    <meta property="article:tag" content=" EF" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Extending EntityFramework Generated Model Classes With T4 Templates" />
+    <meta name="twitter:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. I updated the generated code to render a generic interface if specific properties exist on the" />
+    <meta name="twitter:url" content="https://dannylane.github.io/2017/03/07/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
+    
+    <script type="application/ld+json">
+null
+    </script>
+
+    <meta name="generator" content="HubPress" />
+    <link rel="alternate" type="application/rss+xml" title="" href="https://dannylane.github.io/rss/" />
+
+</head>
+<body class="post-template tag-C tag-T4 tag-EF no-js">
+
+    <span class="mobile btn-mobile-menu">
+        <i class="icon icon-list btn-mobile-menu__icon"></i>
+        <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+
+    <header class="panel-cover panel-cover--collapsed " style="background-image: url(https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png)">
+      <div class="panel-main">
+    
+        <div class="panel-main__inner panel-inverted">
+        <div class="panel-main__content">
+    
+            <h1 class="panel-cover__title panel-title"><a href="https://dannylane.github.io" title="link to homepage for "></a></h1>
+            <hr class="panel-cover__divider" />
+            <p class="panel-cover__description"></p>
+            <hr class="panel-cover__divider panel-cover__divider--secondary" />
+    
+            <div class="navigation-wrapper">
+    
+              <nav class="cover-navigation cover-navigation--primary">
+                <ul class="navigation">
+                  <li class="navigation__item"><a href="https://dannylane.github.io/#blog" title="link to  blog" class="blog-button">Blog</a></li>
+                </ul>
+              </nav>
+    
+              
+              
+              <nav class="cover-navigation navigation--social">
+                <ul class="navigation">
+              
+              
+                  <!-- Twitter -->
+                  <li class="navigation__item">
+                    <a href="https://twitter.com/_danny_lane_" title="Twitter account">
+                      <i class='icon icon-social-twitter'></i>
+                      <span class="label">Twitter</span>
+                    </a>
+                  </li>
+              
+              
+                  <!-- Github -->
+                  <li class="navigation__item">
+                    <a href="https://github.com/dannylane" title="Github account">
+                      <i class='icon icon-social-github'></i>
+                      <span class="label">Github</span>
+                    </a>
+                  </li>
+                  </li>
+              
+              
+              
+              
+                  <!-- LinkedIn -->
+                  <li class="navigation__item">
+                    <a href="https://www.linkedin.com/in/dannylane/" title="LinkedIn account">
+                      <i class='icon icon-social-linkedin'></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+              
+              
+                </ul>
+              </nav>
+              
+    
+            </div>
+    
+          </div>
+    
+        </div>
+    
+        <div class="panel-cover--overlay"></div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            
+
+  <article class="post-container post-container--single">
+
+    <header class="post-header">
+      <div class="post-meta">
+        <time datetime="07 Mar 2017" class="post-meta__date date">07 Mar 2017</time> &#8226; <span class="post-meta__tags tags">on <a href="https://dannylane.github.io/tag/C/">C#</a>, <a href="https://dannylane.github.io/tag/T4/"> T4</a>, <a href="https://dannylane.github.io/tag/EF/"> EF</a></span>
+        <span class="post-meta__author author"><img src="https://avatars3.githubusercontent.com/u/250202?v&#x3D;3" alt="profile image for Danny Lane" class="avatar post-meta__avatar" /> by Danny Lane</span>
+      </div>
+      <h1 class="post-title">Extending EntityFramework Generated Model Classes With T4 Templates</h1>
+    </header>
+
+    <section class="post tag-C tag-T4 tag-EF">
+      <div class="paragraph">
+<p>I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.<br>
+I updated the generated code to render a generic interface if specific properties exist on the model. 2 helper methods (<code>Clone</code> &amp; <code>Update</code>) were added to the models and were regenerated whenever the model was refreshed.</p>
+</div>
+<div id="img-project" class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/t4/project.png" alt="project.png">
+</div>
+<div class="title">Figure 1. EnttityVersion.ttinclude</div>
+</div>
+<div class="paragraph">
+<p>I added new templating content as methods exposed in a <code>.ttinclude</code> file.</p>
+</div>
+<div id="img-t4" class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/t4/t4.png" alt="t4.png">
+</div>
+<div class="title">Figure 2. Add reference to .ttinclude file</div>
+</div>
+<div class="paragraph">
+<p>Using DB first EF and generating the model from the existing schema uses a t4 template, <code>model1.tt</code> by default.</p>
+</div>
+<div class="paragraph">
+<p>The <code>.ttinclude</code> file can be added to the top of this template and every model class that is generated will include the new content you define.</p>
+</div>
+<div class="listingblock">
+<div class="title">RenderInterfaces template method</div>
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#+void Render_Interfaces(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
+var members = ((EntityType)entity).DeclaredProperties;
+
+var pk = entity.KeyMembers.Any(k=&gt;k.Name.EndsWith("SeqID"));
+var hasEE = members.Any(m=&gt;m.Name=="EffectiveEndDate");
+var hasES = members.Any(m=&gt;m.Name=="EffectiveStartDate");
+var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
+
+#&gt;
+:IClonable&lt;&lt;#=entity.Name #&gt;&gt;&lt;#+if(hasEE &amp;&amp; hasES){#&gt;, IVersionable&lt;&lt;#=entity.Name #&gt;&gt;&lt;#+}#&gt;&lt;#+if(pk &amp;&amp; hasEE &amp;&amp; hasES &amp;&amp; hasStatusID){#&gt;, IStatusEntity&lt;#+}#&gt;
+&lt;#+}#&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>Render_Interfaces</code> method checks for specific columns/properties on the model and if they exist (<code>SeqID</code>, <code>EffectiveEndDate</code> &amp; <code>EffectiveStartDate</code>) then the generated class should have the interfaces <code>IVersionable&lt;T&gt;</code> &amp; <code>IClonable&lt;T&gt;</code></p>
+</div>
+<div class="listingblock">
+<div class="title">Adding the <code>Render_Interfaces</code> method to the Model1.tt file</div>
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#=codeStringGenerator.EntityClassOpening(entity)#&gt; &lt;#this.Render_Interfaces(entity);#&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The second method in the <code>.ttinclude</code> template is the one that adds the <code>Clone</code> and <code>Update</code> methods.</p>
+</div>
+<div class="listingblock">
+<div class="title"><code>Clone</code> and <code>Update</code> method templates</div>
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#+
+void Render_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
+
+/// &lt;summary&gt;
+/// Creates a shallow copy of the &lt;#=entity.Name #&gt;
+/// Only copies primative types, should not copy primary keys
+/// &lt;/summary&gt;
+/// &lt;returns&gt;A new clone&lt;/returns&gt;
+public &lt;#=entity.Name #&gt; Clone(){
+	return new &lt;#= entity.Name #&gt;{
+    &lt;#+
+    for(var i = 0; i &lt; members.Count(); i++){
+        if(!entity.KeyMembers.Any(k=&gt;k.Name == members[i].Name)){
+		#&gt;
+&lt;#=members[i].Name#&gt; = &lt;#=members[i].Name#&gt;,
+	&lt;#+}
+    }#&gt;
+    };
+}
+
+/// &lt;summary&gt;
+/// Updates the &lt;#=entity.Name #&gt; with values from the source
+/// Only updates primative types, should not update primary keys
+/// &lt;/summary&gt;
+public void Update(&lt;#=entity.Name #&gt; source){
+    &lt;#+for(var i = 0; i &lt; members.Count(); i++){
+        if(!entity.KeyMembers.Any(k=&gt;k.Name == members[i].Name)){#&gt;
+		this.&lt;#=members[i].Name#&gt; = source.&lt;#=members[i].Name#&gt;;
+	&lt;#+}
+    }#&gt;
+}</code></pre>
+</div>
+</div>
+<div id="img-t4" class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/t4/render.png" alt="render.png">
+</div>
+<div class="title">Figure 3. Calling the <code>Render_Methods</code> helper method</div>
+</div>
+<div class="paragraph">
+<p>The result of updating the interfaces and adding the <code>Clone</code> &amp; <code>Update</code> methods at the start of the class template looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">public partial class Employee :IClonable&lt;Employee&gt;, IVersionable&lt;Employee&gt;{
+/*
+    Template debug info
+    ---------------------
+    Has PK ending with 'SeqID' : True
+    Has EE : True
+    Has ES : True
+    Has Status : False
+    */
+
+
+/// &lt;summary&gt;
+/// Creates a shallow copy of the Employee
+    /// Only copies primative types, should not copy primary keys
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;A new clone&lt;/returns&gt;
+    public Employee Clone(){
+    	return new Employee{
+        EID = EID,
+    	PartyID = PartyID,
+    	PreferredRoleID = PreferredRoleID,
+    	AccessExpiryDate = AccessExpiryDate,
+    	EffectiveStartDate = EffectiveStartDate,
+    	EffectiveEndDate = EffectiveEndDate,
+    	    };
+    }
+
+    /// &lt;summary&gt;
+    /// Updates the Employee with values from the source
+    /// Only updates primative types, should not update primary keys
+    /// &lt;/summary&gt;
+    public void Update(Employee source){
+        this.EID = source.EID;
+    	this.PartyID = source.PartyID;
+    	this.PreferredRoleID = source.PreferredRoleID;
+    	this.AccessExpiryDate = source.AccessExpiryDate;
+    	this.EffectiveStartDate = source.EffectiveStartDate;
+    	this.EffectiveEndDate = source.EffectiveEndDate;
+    	}
+
+
+    public int SeqId{
+    	get{
+    	return EmployeePartySeqID;
+    	}
+    	set{
+    	EmployeePartySeqID = value;
+    	}
+    }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Customizing the generated templates is pretty simple once you get the hang of the default template. I definitely prefer a code first approach, unfortunately that wasn&#8217;t an option on this project. While having to work with the <code>edmx</code> isn&#8217;t my preference, it is useful to know how to fine tune the models if needs be.</p>
+</div>
+    </section>
+
+  </article>
+
+
+
+
+            <footer class="footer">
+                <span class="footer__copyright">&copy; 2017. All rights reserved.</span>
+                <span class="footer__copyright"><a href="http://uno.daleanthony.com" title="link to page for Uno Ghost theme">Uno theme</a> by <a href="http://daleanthony.com" title="link to website for Dale-Anthony">Dale-Anthony</a></span>
+                <span class="footer__copyright">Proudly published with <a href="http://hubpress.io" title="link to Hubpress website">Hubpress</a></span>
+            </footer>
+        </div>
+    </div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
+      <script type="text/javascript">
+        jQuery( document ).ready(function() {
+          // change date with ago
+          jQuery('ago.ago').each(function(){
+            var element = jQuery(this).parent();
+            element.html( moment(element.text()).fromNow());
+          });
+        });
+
+        hljs.initHighlightingOnLoad();
+      </script>
+
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488928561004"></script>
+    
+
+</body>
+</html>
