@@ -1,4 +1,5 @@
 = Extending EntityFramework Generated Model Classes With T4 Templates
+:published_at:2017-03-07
 :hp-tags: C#, T4, EF
 
 [%hardbreaks]
