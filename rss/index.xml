@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Untitled RSS Feed]]></title><description><![CDATA[Untitled RSS Feed]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Untitled RSS Feed</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 07 Mar 2017 13:17:47 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Extending EntityFramework Generated Model Classes With T4 Templates]]></title><description><![CDATA[<div class="paragraph">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Untitled RSS Feed]]></title><description><![CDATA[Untitled RSS Feed]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Untitled RSS Feed</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 07 Mar 2017 13:27:09 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Extending EntityFramework Generated Model Classes With T4 Templates]]></title><description><![CDATA[<div class="paragraph">
 <p>I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.</p>
 </div>
 <div id="img-project" class="imageblock">
@@ -47,30 +47,14 @@ var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
 <pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#=codeStringGenerator.EntityClassOpening(entity)#&gt; &lt;#this.Render_Interfaces(entity);#&gt;</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The second method in the <code>.ttinclude</code> file is the one that adds the <code>Clone</code> and <code>Update</code> methods.</p>
+</div>
 <div class="listingblock">
+<div class="title"><code>Clone</code> and <code>Update</code> method templates</div>
 <div class="content">
 <pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#+
-// Note: You can call this method from the outside of the template,
-//       please add parameters as needed.
-// To include this templaate just drag this file on another editor
-// then call this.Render_DDS_Methods()
-void Render_DDS_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
-var members = ((EntityType)entity).DeclaredProperties;
-
-var pk = entity.KeyMembers.Any(k=&gt;k.Name.EndsWith("SeqID"));
-var pkName = entity.KeyMembers.Where(k=&gt;k.Name.EndsWith("SeqID"));
-var hasEE = members.Any(m=&gt;m.Name=="EffectiveEndDate");
-var hasES = members.Any(m=&gt;m.Name=="EffectiveStartDate");
-var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
-#&gt;
-/*
-Template debug info
-__________________
-Has PK ending with 'SeqID' : &lt;#= pk #&gt;
-Has EE : &lt;#= hasEE #&gt;
-Has ES : &lt;#= hasES #&gt;
-Has Status : &lt;#= hasStatusID #&gt;
-*/
+void Render_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
 
 /// &lt;summary&gt;
 /// Creates a shallow copy of the &lt;#=entity.Name #&gt;
@@ -99,30 +83,14 @@ public void Update(&lt;#=entity.Name #&gt; source){
 		this.&lt;#=members[i].Name#&gt; = source.&lt;#=members[i].Name#&gt;;
 	&lt;#+}
     }#&gt;
-}
-
-&lt;#+if(!pk || !hasEE || !hasES)
-{
-return;
-}
-
-var pkNameValue = pkName.First().Name; // pkName would be null before the last if
-// Only do the version method if the class is versionable
-#&gt;
-
-public int SeqId{
-	get{
-	return &lt;#=pkNameValue #&gt;;
-	}
-	set{
-	&lt;#=pkNameValue#&gt; = value;
-	}
-}
-
-&lt;#+
-}
-#&gt;</code></pre>
+}</code></pre>
 </div>
+</div>
+<div id="img-t4" class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/t4/render.png" alt="render.png">
+</div>
+<div class="title">Figure 3. Calling the <code>Render_Methods</code> helper method</div>
 </div>
 <div class="listingblock">
 <div class="content">
