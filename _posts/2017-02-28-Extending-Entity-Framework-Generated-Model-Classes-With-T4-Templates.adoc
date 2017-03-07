@@ -1,6 +1,6 @@
-= new title
-;;;
-dd image:zoom.png[]
+= Extending EntityFramework Generated Model Classes With T4 Templates 
+
+image:t4/t4.png[]
 
 d
 [source,c#]
