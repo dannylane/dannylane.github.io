@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488892667828" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488893229513" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
     <meta name="referrer" content="origin" />
@@ -191,30 +191,14 @@ var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
 <pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#=codeStringGenerator.EntityClassOpening(entity)#&gt; &lt;#this.Render_Interfaces(entity);#&gt;</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The second method in the <code>.ttinclude</code> file is the one that adds the <code>Clone</code> and <code>Update</code> methods.</p>
+</div>
 <div class="listingblock">
+<div class="title"><code>Clone</code> and <code>Update</code> method templates</div>
 <div class="content">
 <pre class="highlight"><code class="language-c#" data-lang="c#">&lt;#+
-// Note: You can call this method from the outside of the template,
-//       please add parameters as needed.
-// To include this templaate just drag this file on another editor
-// then call this.Render_DDS_Methods()
-void Render_DDS_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
-var members = ((EntityType)entity).DeclaredProperties;
-
-var pk = entity.KeyMembers.Any(k=&gt;k.Name.EndsWith("SeqID"));
-var pkName = entity.KeyMembers.Where(k=&gt;k.Name.EndsWith("SeqID"));
-var hasEE = members.Any(m=&gt;m.Name=="EffectiveEndDate");
-var hasES = members.Any(m=&gt;m.Name=="EffectiveStartDate");
-var hasStatusID = members.Any(m=&gt;m.Name=="StatusID");
-#&gt;
-/*
-Template debug info
-__________________
-Has PK ending with 'SeqID' : &lt;#= pk #&gt;
-Has EE : &lt;#= hasEE #&gt;
-Has ES : &lt;#= hasES #&gt;
-Has Status : &lt;#= hasStatusID #&gt;
-*/
+void Render_Methods(System.Data.Entity.Core.Metadata.Edm.EntityTypeBase entity){
 
 /// &lt;summary&gt;
 /// Creates a shallow copy of the &lt;#=entity.Name #&gt;
@@ -243,30 +227,14 @@ public void Update(&lt;#=entity.Name #&gt; source){
 		this.&lt;#=members[i].Name#&gt; = source.&lt;#=members[i].Name#&gt;;
 	&lt;#+}
     }#&gt;
-}
-
-&lt;#+if(!pk || !hasEE || !hasES)
-{
-return;
-}
-
-var pkNameValue = pkName.First().Name; // pkName would be null before the last if
-// Only do the version method if the class is versionable
-#&gt;
-
-public int SeqId{
-	get{
-	return &lt;#=pkNameValue #&gt;;
-	}
-	set{
-	&lt;#=pkNameValue#&gt; = value;
-	}
-}
-
-&lt;#+
-}
-#&gt;</code></pre>
+}</code></pre>
 </div>
+</div>
+<div id="img-t4" class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/t4/render.png" alt="render.png">
+</div>
+<div class="title">Figure 3. Calling the <code>Render_Methods</code> helper method</div>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -349,7 +317,7 @@ public int SeqId{
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488892667828"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488893229513"></script>
     
 
 </body>
