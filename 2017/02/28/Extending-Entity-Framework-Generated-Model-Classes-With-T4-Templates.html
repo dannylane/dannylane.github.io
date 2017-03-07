@@ -25,14 +25,14 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488893431883" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488900887545" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
     <meta name="referrer" content="origin" />
     
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Extending EntityFramework Generated Model Classes With T4 Templates" />
-    <meta property="og:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. Figure 1. EnttityVersion.ttinclude I added new templating content as methods exposed in a .ttinclude file." />
+    <meta property="og:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. I updated the generated code to render a generic interface if specific properties exist on the" />
     <meta property="og:url" content="https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
     <meta property="article:tag" content="C#" />
     <meta property="article:tag" content=" T4" />
@@ -40,7 +40,7 @@
     
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Extending EntityFramework Generated Model Classes With T4 Templates" />
-    <meta name="twitter:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. Figure 1. EnttityVersion.ttinclude I added new templating content as methods exposed in a .ttinclude file." />
+    <meta name="twitter:description" content="I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently. I updated the generated code to render a generic interface if specific properties exist on the" />
     <meta name="twitter:url" content="https://dannylane.github.io/2017/02/28/Extending-Entity-Framework-Generated-Model-Classes-With-T4-Templates.html" />
     
     <script type="application/ld+json">
@@ -143,7 +143,8 @@ null
 
     <section class="post tag-C tag-T4 tag-EF">
       <div class="paragraph">
-<p>I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.</p>
+<p>I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.<br>
+I updated the generated code to render a generic interface if specific properties exist on the model. 2 helper methods to  (<code>Clone</code> &amp; <code>Version</code>)</p>
 </div>
 <div id="img-project" class="imageblock">
 <div class="content">
@@ -320,7 +321,7 @@ public void Update(&lt;#=entity.Name #&gt; source){
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488893431883"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488900887545"></script>
     
 
 </body>
