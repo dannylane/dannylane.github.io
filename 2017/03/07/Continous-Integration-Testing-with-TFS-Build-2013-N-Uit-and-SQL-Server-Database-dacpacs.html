@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488928200480" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1488928293942" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/03/07/Continous-Integration-Testing-with-TFS-Build-2013-N-Uit-and-SQL-Server-Database-dacpacs.html" />
     <meta name="referrer" content="origin" />
@@ -300,6 +300,9 @@ It would have been easy to make the DB spin up and down per test but that would 
         }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The optional script per test fixture relied on a convention where the name of the sql file to be run matches the name of the test fixture class.</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-c#" data-lang="c#">        protected void RunOptionalScript()
@@ -347,7 +350,7 @@ It would have been easy to make the DB spin up and down per test but that would 
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488928200480"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1488928293942"></script>
     
 
 </body>
