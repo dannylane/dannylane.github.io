@@ -1,7 +1,9 @@
 = Extending EntityFramework Generated Model Classes With T4 Templates
 :hp-tags: C#, T4, EF
 
+[%hardbreaks]
 I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.
+I updated the generated code to render a generic interface if specific properties exist on the model. 2 helper methods to  (`Clone` & `Version`)
 
 [[img-project]]
 .EnttityVersion.ttinclude
