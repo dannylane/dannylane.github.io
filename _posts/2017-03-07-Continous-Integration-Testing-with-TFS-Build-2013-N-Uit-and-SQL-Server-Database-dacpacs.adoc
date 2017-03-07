@@ -1,13 +1,13 @@
 = Continous Integration Testing with TFS Build 2013, NUnit and SQL Server Database dacpacs
+:hardbreaks:
 
 I spent some time recently working on a .NET project where the DB schema was put in place before application development began. The schema was complex, simple entities were spread across multiple tables, there were requirements around maintaining in-table historical versions of almost all records. There were very few simple insert/updates in the application, all DB actions became a series of versioning records and realigning historical records to maintain historical integrity.
 
 It quickly became apparent that the DB access code was going to be an area of high risk and that we should take steps to mitigate that risk by including the DB interaction in our automated tests.
 I have a strong preference for unit tests over integration tests, I like to mock the elements that are outside the boundary of my control. It's good to test how an application responds to external failures, like an unavailable service or a DB timeout, but you need to be able to assume that the services you consume or the DB technology you are building on is reasonably reliable. I like the image of the testing pyramid that puts the focus on unit tests, some integration tests and a few end to end tests.
 
-image::https://2.bp.blogspot.com/-YTzv_O4TnkA/VTgexlumP1I/AAAAAAAAAJ8/57-rnwyvP6g/s1600/image02.png[triangle,400,100]
+image::https://2.bp.blogspot.com/-YTzv_O4TnkA/VTgexlumP1I/AAAAAAAAAJ8/57-rnwyvP6g/s1600/image02.png[triangle,200,200,link="https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html"]
 
-https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html
 
 The risk for this project was that we needed to be sure that we were persisting our data in a predictable manner, we needed to verify we weren't loosing information among all the versioning madness that was going on. 
 
@@ -19,77 +19,80 @@ There was a SQL Server Database project used to manage the schema but the schema
 It was my first time working with a DB project like this and I found it incredibly useful.
 It takes most of the pain out of deploying schema changes, you still need to be able to handle data migrations but I'll talk about that another day.
 
-pasted2
+.DB project structure
+image::ci/1.project.png[]
+
 The build artifact produced by the DB project is a dacpac file. The dacpac includes some manual scripts that we use to prepopulate a new DB with setup/reference data. Deploying the dacpac before the integration test will also give us test data to work with in our tests.
 
-I setup an IntegrationTestSetUp class that has the [SetUpFixture] attribute
-https://github.com/nunit/docs/wiki/SetUpFixture-Attribute
-""A SetUpFixture outside of any namespace provides SetUp and TearDown for the entire assembly.
+I setup an `IntegrationTestSetUp` class that has the `[SetUpFixture]` attribute from https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html[nunit]
+[quote]
+____
+A SetUpFixture outside of any namespace provides SetUp and TearDown for the entire assembly.
+____
 
-pasted4
-pasted5
-[SetUp]
-        public void RunBeforeAnyTests()
-        {
-            TestLogSetup.Logger();
-            log = LogManager.GetLogger(GetType());
-            dbName = GenerateDbName();
-            DeployDacpac(dbName);
-            UpdateConfig(dbName);
-        }
+.`SetUpFixture` per class library
+image::ci/2.setupfixture.png[]
+
+.`SetUp` method runs once per class library
+image::ci/3.setup.png[]
 
 The setup method deployed a version of the dacpac to the localdb server.
 
 The code for deploying the dacpac looks like this
-        private const string ConnectionStringFormat = "data source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connection Timeout=60;Database={0}";
 
+[source,c#]
+----
+private const string ConnectionStringFormat = "data source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connection Timeout=60;Database={0}";
 
-        private static void DeployDacpac(string databaseName)
-        {
-            var start = DateTime.UtcNow;
+private static void DeployDacpac(string databaseName)
+{
+    var start = DateTime.UtcNow;
 
-            var path = AppDomain.CurrentDomain.BaseDirectory + "\\..\\..\\..\\..\\DDS.Database\\bin\\Output\\DDS.Database.dacpac";
+    var path = AppDomain.CurrentDomain.BaseDirectory + "\\..\\..\\..\\..\\DDS.Database\\bin\\Output\\DDS.Database.dacpac";
 
-            // The dacpac is in a different location on the build server.
-            if (!File.Exists(path))
-            {
-                path = AppDomain.CurrentDomain.BaseDirectory + "\\DDS.Database.dacpac";
-            }
-            try
-            {
-                var service = new DacServices(GetConnectionString(databaseName));
-                service.Message += (sender, args) => log.Debug(args.Message); //Console.WriteLine(args.Message);
-                service.ProgressChanged += (sender, args) => log.Debug(args.Message);//Console.WriteLine(args.Message);
-                var dacpac = DacPackage.Load(path);
-                var ddo = new DacDeployOptions
+    // The dacpac is in a different location on the build server.
+    if (!File.Exists(path))
+    {
+        path = AppDomain.CurrentDomain.BaseDirectory + "\\DDS.Database.dacpac";
+    }
+    try
+    {
+        var service = new DacServices(GetConnectionString(databaseName));
+        service.Message += (sender, args) => log.Debug(args.Message); //Console.WriteLine(args.Message);
+        service.ProgressChanged += (sender, args) => log.Debug(args.Message);//Console.WriteLine(args.Message);
+        var dacpac = DacPackage.Load(path);
+        var ddo = new DacDeployOptions
                 {
                     BlockOnPossibleDataLoss = false,
                     CreateNewDatabase = true
                 };
-                ddo.SqlCommandVariableValues.Add("DeploymentEnvironment", "IntegrationTest");
-                service.Deploy(dacpac, databaseName, true, ddo);
-            }
-            catch (Exception ex)
+        ddo.SqlCommandVariableValues.Add("DeploymentEnvironment", "IntegrationTest");
+        service.Deploy(dacpac, databaseName, true, ddo);
+    }
+       catch (Exception ex)
             {
                 log.Debug(String.Format(ex.Message));
                 log.Debug(String.Format(ex.InnerException != null ? ex.InnerException.Message : "No inner exception"));
             }
 
-            log.Debug(String.Format("DB spin up in " + DateTime.UtcNow.Subtract(start).Seconds));
+        log.Debug(String.Format("DB spin up in " + DateTime.UtcNow.Subtract(start).Seconds));
         }
-pasted6
-NOTE the output of the messages
+----
 
+The `DacServices` class is used to deploy the dacpac.
 
 The connection string was generated randomly for each assembly so that all the tests within an assembly would be using a dedicated DB.
 It would have been easy to make the DB spin up and down per test but that would have slowed the builds considerably.
 
-This test SetUp class was linked to all other integration test projects so the....
+This `IntegrationSetUp` class was linked to all other integration test projects so that the code didn't need to be duplicated, it was written once and then linked to the other projects.
 
-pasted3
-The tear down method deleted the db
-pasted8
+.The `IntegrationSetUp` is a linked file in the test projects.
+image::ci/5.linkedsetup.png[]
 
+The tear down method deleted the db: 
+
+[source,c#]
+----
  private const string DropDatabaseCommand = "USE master " +
                                            "IF DB_ID('{0}') IS NOT NULL " +
                                            "BEGIN " +
@@ -111,10 +114,12 @@ pasted8
             }
             log.Debug(String.Format("Dropped database {0}. {1}", databaseName, result));
         }
+----
 
+I also wrote a base test class that allowed developers to setup SQL scripts for inserting data that is specific to the test they are working on. This allows us to isolate data that will be  manipulated by a test from impacting on other test data.
 
-I also wrote a base test class that allowed developers to setup sql scripts for inserting data that is specific to the test they are working on. This allows us to isolate data that will be  manipulated by a test from impacting on other test data.
-
+[source,c#]
+----
 public abstract class IntegrationTestBase
 
         [TestFixtureSetUp]
@@ -124,17 +129,18 @@ public abstract class IntegrationTestBase
             RunManualScripts();
             RunOptionalScript();
         }
+----
 
-pasted7
-
+[source,c#]
+----
         protected void RunOptionalScript()
         {
             var thisType = GetType();
             var path = string.Format(@"{0}\{2}.Scripts\{1}.sql", AppDomain.CurrentDomain.BaseDirectory, thisType.Name, thisType.Assembly.GetName().Name);
             RunScriptFromPath(path);
         }
-pasted9
-pasted9
+----
+
 We had 4 integration test libraries so on each build 4 different DBs would be provisioned.
 
 Having the tests setup like this allowed us a lot of flexibility when writing our integration tests, most importantly it became easy for the team to write the tests in a reproducible manner and abstracted away all the heavy lifting that needed to be done around the DB setups.
