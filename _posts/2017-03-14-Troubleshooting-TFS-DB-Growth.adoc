@@ -98,7 +98,7 @@ foreach ($project in $projects){
     foreach ($buildDef in $buildDefs){
         Write-Host "-" + $buildDef.Name
         # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
-		$endDate = (Get-Date).AddDays(-14) 
+        $endDate = (Get-Date).AddDays(-14) 
         # Keep going back until we hit dec 2014
         while($endDate.Year -ge 2014){ 
             $year = $endDate.Year
@@ -112,7 +112,8 @@ foreach ($project in $projects){
             # only build info, not workitems, labels, etc
             $buildDetailSpec.InformationTypes = $null 
 
-## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
+            ## This is important for the query, builds that are deletd by retention 
+            ## or the ui are only logically deleted, not destroyed in the db
             $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted 
 
             # Search all the things
