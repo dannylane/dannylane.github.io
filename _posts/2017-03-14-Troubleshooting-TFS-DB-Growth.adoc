@@ -92,42 +92,56 @@ $projects = $vcs.GetAllTeamProjects($true) # We will run this for all team proje
 foreach ($project in $projects){
     Write-Host $project.Name
 
-    $buildDefs = $buildServer.QueryBuildDefinitions($project.Name) # Get all the build definitions for a given project
+    # Get all the build definitions for a given project
+    $buildDefs = $buildServer.QueryBuildDefinitions($project.Name) 
 
     foreach ($buildDef in $buildDefs){
         Write-Host "-" + $buildDef.Name
-		$endDate = (Get-Date).AddDays(-14) # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
-        while($endDate.Year -ge 2014){ # Keep going back until we hit dec 2014
+        # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
+		$endDate = (Get-Date).AddDays(-14) 
+        # Keep going back until we hit dec 2014
+        while($endDate.Year -ge 2014){ 
             $year = $endDate.Year
             $month = $endDate.Month
             write-host $year $month
-            $buildDetailSpec = $buildServer.CreateBuildDetailSpec($project.Name, $buildDef.Name) # Create a search object for the project/build def
+            # Create a search object for the project/build def
+            $buildDetailSpec = $buildServer.CreateBuildDetailSpec($project.Name, $buildDef.Name) 
             $startDate = $endDate.addMonths(-1)
             $buildDetailSpec.MaxFinishTime = $endDate # Search criteria
             $buildDetailSpec.MinFinishTime = $startDate # Search criteria
-            $buildDetailSpec.InformationTypes = $null # only build info, not workitems, labels, etc
+            # only build info, not workitems, labels, etc
+            $buildDetailSpec.InformationTypes = $null 
 
-			## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
+## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
             $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted 
 
-            $builds = $buildServer.QueryBuilds($buildDetailSpec) # Search all the things
+            # Search all the things
+            $builds = $buildServer.QueryBuilds($buildDetailSpec) 
             if($builds.Builds.Length -ge 1){
                 Write-Host "before update" $builds.Builds
-                foreach($build in $builds.Builds){ # Need to turn off the Keep Forever (Retain) flag set by Release Manager.
+                foreach($build in $builds.Builds){ 
+                    # Need to turn off the Keep Forever (Retain) flag set by Release Manager.
                     if ($build.KeepForever -eq $true){
                         Write-Host "Updating build " $build.Uri
-                        $buildToEdit = $buildServer.GetBuild($build.Uri) # Gets an updatable ref to the build
-                        $buildToEdit.KeepForever = $false; # Edit the build flag
-                        $buildServer.SaveBuilds(@($buildToEdit)) # save the build back to the tfs
+                        # Gets an updatable ref to the build
+                        $buildToEdit = $buildServer.GetBuild($build.Uri)
+                        # Edit the build flag
+                        $buildToEdit.KeepForever = $false; 
+                        # save the build back to the tfs
+                        $buildServer.SaveBuilds(@($buildToEdit)) 
                     }
                 }
-                $builds = $buildServer.QueryBuilds($buildDetailSpec) # refresh the query given that some of the builds have been updated
+                # refresh the query given that some of the builds have been updated
+                $builds = $buildServer.QueryBuilds($buildDetailSpec) 
                 Write-Host "after refresh" $builds.Builds
-                $buildServer.DeleteBuilds($builds.Builds, [Microsoft.TeamFoundation.Build.Client.DeleteOptions]::All) # Delete the build, test results, symbols, drop, etc.
-                $buildServer.DestroyBuilds($builds.Builds) # Destroy the db records
+                # Delete the build, test results, symbols, drop, etc.
+                $buildServer.DeleteBuilds($builds.Builds,
+                [Microsoft.TeamFoundation.Build.Client.DeleteOptions]::All) 
+                # Destroy the db records
+                $buildServer.DestroyBuilds($builds.Builds) 
             }
-                
-            $endDate = $endDate.addMonths(-1) # rolling back the years.
+            # rolling back the years.
+            $endDate = $endDate.addMonths(-1) 
         }   
     }
 }
