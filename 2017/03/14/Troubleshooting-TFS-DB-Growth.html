@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1489180494172" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1489180636120" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/03/14/Troubleshooting-TFS-DB-Growth.html" />
     <meta name="referrer" content="origin" />
@@ -244,110 +244,146 @@ This is the delete from the db. This is not available though the UI and is only 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-powershell" data-lang="powershell"> ----
- param ($serverName = 'http://&lt;snip&gt;:8080/tfs/DefaultCollection')</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Client")<br>
-[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Build.Client")<br>
-[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.VersionControl.Client")<br>
-$tfs = [Microsoft.TeamFoundation.Client.TeamFoundationServerFactory]::GetServer($serverName)</p>
-</div>
-<div class="paragraph">
-<p>$buildServer =  $tfs.GetService([Microsoft.TeamFoundation.Build.Client.IBuildServer])<br>
-$vcs =  $tfs.GetService([Microsoft.TeamFoundation.VersionControl.Client.VersionControlServer])</p>
-</div>
-<div class="paragraph">
-<p>$projects = $vcs.GetAllTeamProjects($true) # We will run this for all team projects</p>
-</div>
-<div class="paragraph">
-<p>foreach ($project in $projects){<br>
-    Write-Host $project.Name</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$buildDefs = $buildServer.QueryBuildDefinitions($project.Name) # Get all the build definitions for a given project</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>  foreach ($buildDef in $buildDefs){
-      Write-Host "-" + $buildDef.Name
-$endDate = (Get-Date).AddDays(-14) # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
-      while($endDate.Year -ge 2014){ # Keep going back until we hit dec 2014
-          $year = $endDate.Year
-          $month = $endDate.Month
-          write-host $year $month
-          $buildDetailSpec = $buildServer.CreateBuildDetailSpec($project.Name, $buildDef.Name) # Create a search object for the project/build def
-          $startDate = $endDate.addMonths(-1)
-          $buildDetailSpec.MaxFinishTime = $endDate # Search criteria
-          $buildDetailSpec.MinFinishTime = $startDate # Search criteria
-          $buildDetailSpec.InformationTypes = $null # only build info, not workitems, labels, etc</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
-         $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$builds = $buildServer.QueryBuilds($buildDetailSpec) # Search all the things
-if($builds.Builds.Length -ge 1){
-    Write-Host "before update" $builds.Builds
-    foreach($build in $builds.Builds){ # Need to turn off the Keep Forever (Retain) flag set by Release Manager.
-        if ($build.KeepForever -eq $true){
-            Write-Host "Updating build " $build.Uri
-            $buildToEdit = $buildServer.GetBuild($build.Uri) # Gets an updatable ref to the build
-            $buildToEdit.KeepForever = $false; # Edit the build flag
-            $buildServer.SaveBuilds(@($buildToEdit)) # save the build back to the tfs
+<pre class="highlight"><code class="language-powershell" data-lang="powershell">param ($serverName = 'http://&lt;snip&gt;:8080/tfs/DefaultCollection')
+
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Client")
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Build.Client")
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.VersionControl.Client")
+$tfs = [Microsoft.TeamFoundation.Client.TeamFoundationServerFactory]::GetServer($serverName)
+
+$buildServer =  $tfs.GetService([Microsoft.TeamFoundation.Build.Client.IBuildServer])
+$vcs =  $tfs.GetService([Microsoft.TeamFoundation.VersionControl.Client.VersionControlServer])
+
+$projects = $vcs.GetAllTeamProjects($true) # We will run this for all team projects
+
+foreach ($project in $projects){
+    Write-Host $project.Name
+
+    $buildDefs = $buildServer.QueryBuildDefinitions($project.Name) # Get all the build definitions for a given project
+
+    foreach ($buildDef in $buildDefs){
+        Write-Host "-" + $buildDef.Name
+		$endDate = (Get-Date).AddDays(-14) # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
+        while($endDate.Year -ge 2014){ # Keep going back until we hit dec 2014
+            $year = $endDate.Year
+            $month = $endDate.Month
+            write-host $year $month
+            $buildDetailSpec = $buildServer.CreateBuildDetailSpec($project.Name, $buildDef.Name) # Create a search object for the project/build def
+            $startDate = $endDate.addMonths(-1)
+            $buildDetailSpec.MaxFinishTime = $endDate # Search criteria
+            $buildDetailSpec.MinFinishTime = $startDate # Search criteria
+            $buildDetailSpec.InformationTypes = $null # only build info, not workitems, labels, etc
+
+			## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
+            $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted
+
+            $builds = $buildServer.QueryBuilds($buildDetailSpec) # Search all the things
+            if($builds.Builds.Length -ge 1){
+                Write-Host "before update" $builds.Builds
+                foreach($build in $builds.Builds){ # Need to turn off the Keep Forever (Retain) flag set by Release Manager.
+                    if ($build.KeepForever -eq $true){
+                        Write-Host "Updating build " $build.Uri
+                        $buildToEdit = $buildServer.GetBuild($build.Uri) # Gets an updatable ref to the build
+                        $buildToEdit.KeepForever = $false; # Edit the build flag
+                        $buildServer.SaveBuilds(@($buildToEdit)) # save the build back to the tfs
+                    }
+                }
+                $builds = $buildServer.QueryBuilds($buildDetailSpec) # refresh the query given that some of the builds have been updated
+                Write-Host "after refresh" $builds.Builds
+                $buildServer.DeleteBuilds($builds.Builds, [Microsoft.TeamFoundation.Build.Client.DeleteOptions]::All) # Delete the build, test results, symbols, drop, etc.
+                $buildServer.DestroyBuilds($builds.Builds) # Destroy the db records
+            }
+
+            $endDate = $endDate.addMonths(-1) # rolling back the years.
         }
     }
-    $builds = $buildServer.QueryBuilds($buildDetailSpec) # refresh the query given that some of the builds have been updated
-    Write-Host "after refresh" $builds.Builds
-    $buildServer.DeleteBuilds($builds.Builds, [Microsoft.TeamFoundation.Build.Client.DeleteOptions]::All) # Delete the build, test results, symbols, drop, etc.
-    $buildServer.DestroyBuilds($builds.Builds) # Destroy the db records
-}</pre>
+}</code></pre>
 </div>
 </div>
-<div class="literalblock">
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.667%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TableName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SchemaName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">RowCounts</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TotalSpaceKB</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UsedSpaceKB</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UnusedSpaceKB</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_Content</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">69733</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1889136</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1869000</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">20136</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_TestResult</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">174868</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">323192</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">321504</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1688</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_LocalVersion</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">413449</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">122072</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120048</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2024</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_BuildCodeChange</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">148950</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">78016</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">77824</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">192</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_Version</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">101484</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">68872</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">68544</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">328</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_BuildInformation2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">88673</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">64232</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">63512</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">720</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_Command</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">dbo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">92974</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">39192</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">38928</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">264</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p> You can see the output from the script in the Diagnostics tab from the build:
+ This is where the script is configured:<br>
+++ This is the build trigger:</p>
+</div>
+<div class="imageblock">
 <div class="content">
-<pre>            $endDate = $endDate.addMonths(-1) # rolling back the years.
-        }
-    }
-}</pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>|===
-|TableName|SchemaName|RowCounts|TotalSpaceKB|UsedSpaceKB|UnusedSpaceKB
-|tbl_Content|dbo|69733|1889136|1869000|20136
-
-|tbl_TestResult|dbo|174868|323192|321504|1688
-
-|tbl_LocalVersion|dbo|413449|122072|120048|2024
-
-|tbl_BuildCodeChange|dbo|148950|78016|77824|192
-
-|tbl_Version|dbo|101484|68872|68544|328
-
-|tbl_BuildInformation2|dbo|88673|64232|63512|720
-
-|tbl_Command|dbo|92974|39192|38928|264
-|===
-
-++ You can see the output from the script in the Diagnostics tab from the build:
-++ This is where the script is configured:
-++ This is the build trigger:
-
-
-
-
-
-image::buildpurge/dummyproject.png[]</pre>
+<img src="https://dannylane.github.io/images/buildpurge/dummyproject.png" alt="dummyproject.png">
 </div>
 </div>
     </section>
@@ -378,7 +414,7 @@ image::buildpurge/dummyproject.png[]</pre>
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1489180494172"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1489180636120"></script>
     
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
