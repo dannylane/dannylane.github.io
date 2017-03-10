@@ -1027,9 +1027,9 @@ code {
 
 pre {
   margin-bottom: 1.3em;
-  padding: 1em 2.5%;
+  /*padding: 1em 2.5%;
   background: #e8f2fb;
-  border: 1px solid #c9e1f6;
+  border: 1px solid #c9e1f6;*/
   border-radius: 3px;
   font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
   font-size: .9em;
@@ -1683,3 +1683,6 @@ input[type="tel"] {
   .btn, .navigation__item a {
     display: block;
     margin-bottom: .4em; } }
+
+
+.hljs{display:block;overflow-x:auto;padding:0.5em;background:#474949;color:#d1d9e1}.hljs-comment,.hljs-quote{color:#969896;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-type,.hljs-addition{color:#cc99cc}.hljs-number,.hljs-selector-attr,.hljs-selector-pseudo{color:#f99157}.hljs-string,.hljs-doctag,.hljs-regexp{color:#8abeb7}.hljs-title,.hljs-name,.hljs-section,.hljs-built_in{color:#b5bd68}.hljs-variable,.hljs-template-variable,.hljs-selector-id,.hljs-class .hljs-title{color:#ffcc66}.hljs-section,.hljs-name,.hljs-strong{font-weight:bold}.hljs-symbol,.hljs-bullet,.hljs-subst,.hljs-meta,.hljs-link{color:#f99157}.hljs-deletion{color:#dc322f}.hljs-formula{background:#eee8d5}.hljs-attr,.hljs-attribute{color:#81a2be}.hljs-emphasis{font-style:italic}
