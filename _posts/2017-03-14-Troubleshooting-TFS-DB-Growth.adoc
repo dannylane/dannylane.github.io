@@ -1,0 +1,178 @@
+= Troubleshooting TFS DB Growth
+:hp-tags: TFS, ReleaseManager
+:published_at: 2017-03-14
+:hardbreaks:
+
+*Spoiler:* This was caused by ReleaseManager 2013 retaining builds. Read on for the work around that was put in place.
+
+As part of a project I was working on recently; I put in a lot of work around TFS Builds, Unit/Integration Tests & continous delivery using ReleaseManager.
+
+It was a fairly standard pipeline:
+→ Checkin → Unit & Integration Tests Run → Build → Release To Test
+
+Up until this project the TFS Build hadn't been used, TFS was just used for source control and some workitem tracking, it was hosted on a VM and didn't take up much apce ********TODO The DB for TFS was a SQL express on the TFS VM (it has since been moved off to a physical server with DR)
+
+After a few months of the project I started getting reports that the TFS VM size was growing constantly. IT had to increase the disk size on the VMs a couple of times.
+
+It turns out that the VM had grown from ***TODO 
+
+After doing a little research online I found the following query that gives some insight into which tables are taking up the most space in the db.
+
+[source,sql]
+----
+USE Tfs_DefaultCollection
+ 
+SELECT
+    t.NAME AS TableName,
+    s.Name AS SchemaName,
+    p.rows AS RowCounts,
+    SUM(a.total_pages) * 8 AS TotalSpaceKB,
+    SUM(a.used_pages) * 8 AS UsedSpaceKB,
+    (SUM(a.total_pages) - SUM(a.used_pages)) * 8 AS UnusedSpaceKB
+FROM
+    sys.tables t
+INNER JOIN     
+    sys.indexes i ON t.OBJECT_ID = i.object_id
+INNER JOIN
+    sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
+INNER JOIN
+    sys.allocation_units a ON p.partition_id = a.container_id
+LEFT OUTER JOIN
+    sys.schemas s ON t.schema_id = s.schema_id
+GROUP BY
+    t.Name, s.Name, p.Rows
+ORDER BY
+    TotalSpaceKB desc
+----
+
+
+**TODO table with high storage & explanation
+
+
+Normally TFS retains builds as defined by a build retention policy, ours tells it to only keep the last 10 builds.
+However, there is a known issue with the Microsoft Release Management 2013 that causes every build that is involved in a release to be retained indefinitely, this doesn't really fit with the continous delivery model and has been changed in newer versions.
+Every check in we do triggers a build which triggers a release so all our builds are retained.
+ 
+This has issues for the storage capacity on the drops folder where builds are dropped and also storage capacity in the database.
+ 
+The issue was exacerbated for this project because of the logging setup in the integration tests. Each test class library gets a DB deployed and dropped and seed scripts run, all the logging from these activities is echoed to the console. The application logging is also set to console output.
+All this log info for each test run is stored in the TFS database which grew unmanageably.
+The logging was turned off on the automated builds so this should help keep the size down for newer builds
+
+** todo logmanager stuff for builds
+
+To manage the retained builds I wrote a powershell script that does the following steps for every build older than 2 weeks:
+
+. Update the Retain Indefinitely flag to false
+. Delete the build 
+. Destroy the build 
+ 
+*Delete the build*
+This is what is available through the UI, it is only a logical delete and while it does delete artifacts from the network drop folders, it does not delete rows from the db
+
+*Destroy the build*
+This is the delete from the db. This is not available though the UI and is only available through the API
+
+I setup a build in TFS that runs at 3am every day and runs this scripts as part of the build.
+ 
+[source,powershell]
+ ----
+ param ($serverName = 'http://<snip>:8080/tfs/DefaultCollection')
+
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Client")
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Build.Client")
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.VersionControl.Client")
+$tfs = [Microsoft.TeamFoundation.Client.TeamFoundationServerFactory]::GetServer($serverName)
+
+$buildServer =  $tfs.GetService([Microsoft.TeamFoundation.Build.Client.IBuildServer])
+$vcs =  $tfs.GetService([Microsoft.TeamFoundation.VersionControl.Client.VersionControlServer])
+
+$projects = $vcs.GetAllTeamProjects($true) # We will run this for all team projects
+
+foreach ($project in $projects){
+    Write-Host $project.Name
+
+    $buildDefs = $buildServer.QueryBuildDefinitions($project.Name) # Get all the build definitions for a given project
+
+    foreach ($buildDef in $buildDefs){
+        Write-Host "-" + $buildDef.Name
+		$endDate = (Get-Date).AddDays(-14) # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
+        while($endDate.Year -ge 2014){ # Keep going back until we hit dec 2014
+            $year = $endDate.Year
+            $month = $endDate.Month
+            write-host $year $month
+            $buildDetailSpec = $buildServer.CreateBuildDetailSpec($project.Name, $buildDef.Name) # Create a search object for the project/build def
+            $startDate = $endDate.addMonths(-1)
+            $buildDetailSpec.MaxFinishTime = $endDate # Search criteria
+            $buildDetailSpec.MinFinishTime = $startDate # Search criteria
+            $buildDetailSpec.InformationTypes = $null # only build info, not workitems, labels, etc
+
+			## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
+            $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted 
+
+            $builds = $buildServer.QueryBuilds($buildDetailSpec) # Search all the things
+            if($builds.Builds.Length -ge 1){
+                Write-Host "before update" $builds.Builds
+                foreach($build in $builds.Builds){ # Need to turn off the Keep Forever (Retain) flag set by Release Manager.
+                    if ($build.KeepForever -eq $true){
+                        Write-Host "Updating build " $build.Uri
+                        $buildToEdit = $buildServer.GetBuild($build.Uri) # Gets an updatable ref to the build
+                        $buildToEdit.KeepForever = $false; # Edit the build flag
+                        $buildServer.SaveBuilds(@($buildToEdit)) # save the build back to the tfs
+                    }
+                }
+                $builds = $buildServer.QueryBuilds($buildDetailSpec) # refresh the query given that some of the builds have been updated
+                Write-Host "after refresh" $builds.Builds
+                $buildServer.DeleteBuilds($builds.Builds, [Microsoft.TeamFoundation.Build.Client.DeleteOptions]::All) # Delete the build, test results, symbols, drop, etc.
+                $buildServer.DestroyBuilds($builds.Builds) # Destroy the db records
+            }
+                
+            $endDate = $endDate.addMonths(-1) # rolling back the years.
+        }   
+    }
+}
+
+----
+
+
+|===
+|TableName|SchemaName|RowCounts|TotalSpaceKB|UsedSpaceKB|UnusedSpaceKB
+|tbl_Content|dbo|69733|1889136|1869000|20136
+
+|tbl_TestResult|dbo|174868|323192|321504|1688
+
+|tbl_LocalVersion|dbo|413449|122072|120048|2024
+
+|tbl_BuildCodeChange|dbo|148950|78016|77824|192
+
+|tbl_Version|dbo|101484|68872|68544|328
+
+|tbl_BuildInformation2|dbo|88673|64232|63512|720
+
+|tbl_Command|dbo|92974|39192|38928|264
+|===
+
+++ You can see the output from the script in the Diagnostics tab from the build:
+++ This is where the script is configured: 
+++ This is the build trigger:
+
+
+
+
+
+image::buildpurge/dummyproject.png[]
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
