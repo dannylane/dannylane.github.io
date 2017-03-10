@@ -76,8 +76,8 @@ This is the delete from the db. This is not available though the UI and is only 
 I setup a build in TFS that runs at 3am every day and runs this scripts as part of the build.
  
 [source,powershell]
- ----
- param ($serverName = 'http://<snip>:8080/tfs/DefaultCollection')
+----
+param ($serverName = 'http://<snip>:8080/tfs/DefaultCollection')
 
 [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Client")
 [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Build.Client")
