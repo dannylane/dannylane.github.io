@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1489180925957" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1489181062620" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/03/14/Troubleshooting-TFS-DB-Growth.html" />
     <meta name="referrer" content="origin" />
@@ -265,7 +265,7 @@ foreach ($project in $projects){
     foreach ($buildDef in $buildDefs){
         Write-Host "-" + $buildDef.Name
         # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
-		$endDate = (Get-Date).AddDays(-14)
+        $endDate = (Get-Date).AddDays(-14)
         # Keep going back until we hit dec 2014
         while($endDate.Year -ge 2014){
             $year = $endDate.Year
@@ -279,7 +279,8 @@ foreach ($project in $projects){
             # only build info, not workitems, labels, etc
             $buildDetailSpec.InformationTypes = $null
 
-## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
+            ## This is important for the query, builds that are deletd by retention
+            ## or the ui are only logically deleted, not destroyed in the db
             $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted
 
             # Search all the things
@@ -428,7 +429,7 @@ foreach ($project in $projects){
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1489180925957"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1489181062620"></script>
     
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
