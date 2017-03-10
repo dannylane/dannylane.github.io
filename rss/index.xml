@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Fri, 10 Mar 2017 21:22:05 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Troubleshooting TFS DB Growth]]></title><description><![CDATA[<div class="paragraph">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Fri, 10 Mar 2017 21:24:22 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Troubleshooting TFS DB Growth]]></title><description><![CDATA[<div class="paragraph">
 <p><strong>Spoiler:</strong> This was caused by ReleaseManager 2013 retaining builds. Read on for the work around that was put in place.</p>
 </div>
 <div class="paragraph">
@@ -120,7 +120,7 @@ foreach ($project in $projects){
     foreach ($buildDef in $buildDefs){
         Write-Host "-" + $buildDef.Name
         # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
-		$endDate = (Get-Date).AddDays(-14)
+        $endDate = (Get-Date).AddDays(-14)
         # Keep going back until we hit dec 2014
         while($endDate.Year -ge 2014){
             $year = $endDate.Year
@@ -134,7 +134,8 @@ foreach ($project in $projects){
             # only build info, not workitems, labels, etc
             $buildDetailSpec.InformationTypes = $null
 
-## This is important for the query, builds that are deletd by retention or the ui are only logically deleted, not destroyed in the db
+            ## This is important for the query, builds that are deletd by retention
+            ## or the ui are only logically deleted, not destroyed in the db
             $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted
 
             # Search all the things
