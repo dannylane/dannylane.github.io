@@ -182,7 +182,7 @@ Step 1/7 : FROM microsoft/aspnetcore:1.0.1
 1.0.1: Pulling from microsoft/aspnetcore
 ----
 
-==== First attempt
+==== Base image vs app version mismatch
 Running the docker container:
 
 [source, bash]
@@ -201,7 +201,7 @@ My first issue was the incorrect version of my app compared to the aspnetcore ve
 I updated the base image in the dockerfile and rebuilt:
 `FROM microsoft/aspnetcore:1.1.0`
 
-==== Second attempt
+==== Copying the correct folder
 
 [source, bash]
 ----
@@ -214,7 +214,7 @@ The issue this time turned out to be the `COPY` command wasn't copying my build 
 
 `COPY $source/bin/Debug/netcoreapp1.1/ .`
 
-==== Third attempt
+==== Publishing artifacts
 
 [source, bash]
 ----
@@ -239,7 +239,7 @@ Published 1/1 projects successfully
 
 `COPY $source/bin/Debug/netcoreapp1.1/publish .`
 
-==== Fourth attempt
+==== Port forwarding
 
 The `publish` did the trick, now I was able to run the docker container... but not access the endpoint.
 
@@ -253,7 +253,7 @@ Now listening on: http://localhost:5000
 Application started. Press Ctrl+C to shut down.
 ----
 
-I ran the docker container specifi
+I ran the docker container specifying `*` as the host to bind to and forwarding port 5000 on the container to post 5001 on my machine. 
 
 [source, bash]
 ----
@@ -264,3 +264,9 @@ Content root path: /app
 Now listening on: http://*:5000
 Application started. Press Ctrl+C to shut down.
 ----
+
+image::dotnetcore/curl2.png[]
+
+That's it, a simple microservice running on the .NET Core Kestrel server and packaged up in a docker image. It's a basic structure for somethign that can be built upon in future.
+
+I've included the terminal commands/output just in case others hit similar issues and hopefully the solutions above will help them.
