@@ -147,12 +147,20 @@ The `project.json` lists the dependancies. In the most recent version of .NET Co
 }
 ----
 
+Using `dotnet run` you can start the server:
 
+image::dotnetcore/curl.png[]
 
+The debug mode of VS Code lets you debug the application as you would expect:
 
-image:
+image::dotnetcore/debug.png[]
 
-=== Docker
+==== Docker
+Now that we can run the service locally, lets add it to a docker container. The first step is to create a `dockerfile`. The Docker extension for VS Code has some commands built in:
+
+image::dotnetcore/dockercommands.png[]
+
+This was the first version of my `dockerfile`, I'll walk through some of the issues I had to troubleshoot further down.
 [source, dockerfile]
 ----
 FROM microsoft/aspnetcore:1.0.1
@@ -164,6 +172,8 @@ COPY $source .
 ENTRYPOINT dotnet dotnet-microservice.dll
 ----
 
+Building my docker file from VS Code:
+
 [source, bash]
 ----
 docker build -f Dockerfile -t dotnet-microservice:latest .
@@ -172,22 +182,52 @@ Step 1/7 : FROM microsoft/aspnetcore:1.0.1
 1.0.1: Pulling from microsoft/aspnetcore
 ----
 
-docker run -it --rm dotnet-microservice:latest
+==== First attempt
+Running the docker container:
+
+[source, bash]
+----
+▶ docker run -it --rm dotnet-microservice:latest
 The specified framework 'Microsoft.NETCore.App', version '1.1.0' was not found.
   - Check application dependencies and target a framework version installed at:
       /usr/share/dotnet/shared/Microsoft.NETCore.App
   - The following versions are installed:
       1.0.1
   - Alternatively, install the framework version '1.1.0'.
-  
-  
-  FROM microsoft/aspnetcore:1.1.0
-  
-  docker run -it --rm dotnet-microservice:latest
+----
+
+My first issue was the incorrect version of my app compared to the aspnetcore version I pulled down in my base image.
+
+I updated the base image in the dockerfile and rebuilt:
+`FROM microsoft/aspnetcore:1.1.0`
+
+==== Second attempt
+
+[source, bash]
+----
+▶ docker run -it --rm dotnet-microservice:latest
+Did you mean to run dotnet SDK commands? Please install dotnet SDK from:
+  http://go.microsoft.com/fwlink/?LinkID=798306&clcid=0x409
+----
+
+The issue this time turned out to be the `COPY` command wasn't copying my build output to the working dir of the image.
+
+`COPY $source/bin/Debug/netcoreapp1.1/ .`
+
+==== Third attempt
+
+[source, bash]
+----
+docker run -it --rm dotnet-microservice:latest
 Error: assembly specified in the dependencies manifest was not found -- package:
 'Microsoft.DotNet.PlatformAbstractions', version: '1.1.0', path: 'lib/netstandard
 1.3/Microsoft.DotNet.PlatformAbstractions.dll'
+----
 
+This time I realized I was copying the `build` output but I needed to be running a `publish` so that dependencies are included. I needed to run `dotnet publish` and change the `COPY` to pick up the published output.
+
+[source, bash]
+----
 ▶ dotnet publish
 Publishing dotnet-microservice for .NETCoreApp,Version=v1.1
 Project dotnet-microservice (.NETCoreApp,Version=v1.1) was previously compiled. S
@@ -195,20 +235,32 @@ kipping compilation.
 publish: Published to /Users/danny/dev/dotnet-microservice/bin/Debug/netcoreapp1.
 1/publish
 Published 1/1 projects successfully
+----
 
-COPY $source/bin/Debug/netcoreapp1.1/publish .
+`COPY $source/bin/Debug/netcoreapp1.1/publish .`
 
+==== Fourth attempt
+
+The `publish` did the trick, now I was able to run the docker container... but not access the endpoint.
+
+[source, bash]
+----
 ▶ docker run -it --rm dotnet-microservice:latest
 Hello World!
 Hosting environment: Production
 Content root path: /app
 Now listening on: http://localhost:5000
 Application started. Press Ctrl+C to shut down.
+----
 
+I ran the docker container specifi
 
+[source, bash]
+----
 ▶ docker run -p 5001:5000 dotnet-microservice
 Hello World!
 Hosting environment: Production
 Content root path: /app
 Now listening on: http://*:5000
 Application started. Press Ctrl+C to shut down.
+----
