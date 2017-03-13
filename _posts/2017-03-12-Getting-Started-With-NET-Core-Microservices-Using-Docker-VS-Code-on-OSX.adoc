@@ -1,9 +1,12 @@
-= Getting Started With a .NET Core Microservice Using VS Code & Docker on OSX 
-:hp-tags: .net, core, docker, osx
+= Getting Started With .NET Core Microservices Using Docker & VS Code on OSX 
+:hp-tags: .net, core, docker, osx, vscode, microservice
 
-=== Install dotnet Core
+I've started working on some .NET Core microservices stuff and thought I'd outline the steps I took to get a basic instance of a .NET Core service up and running in Docker on OSX. 
 
-The instructions are link:https://www.microsoft.com/net/core#macos[here]
+=== Install .NET Core
+[%hardbreaks]
+The full instructions are link:https://www.microsoft.com/net/core#macos[here]
+First, install openssl using link:https://brew.sh/[Homebrew]
 
 [source, bash]
 ----
@@ -41,9 +44,10 @@ That should produce a simple `Hello World` output:
 image::dotnetcore/helloworld.png[]
 
 === Install VS Code
-Now that we have the basic dotnet core app let's install VS Code to use as our IDE. The OSX download is available at link:https://code.visualstudio.com/[code.visualstudio.com]
 
+Now that we have the basic .NET Core app let's install VS Code to use as our IDE. The OSX download is available at link:https://code.visualstudio.com/[code.visualstudio.com]
 
+A microservice will normally expose a RESTful interface, to serve as the host we add a `WebHostBuilder` to the main method. Kestrel is a lightweight web server included in .NET Core. The `Startup` class is passed to the web host and allows you to define routing, DI and other services. The `ConfigurationBuilder` can be used to compile config settings from different sources; file, args, env, etc.
 [source, c#]
 ----
         public static void Main(string[] args)
@@ -65,6 +69,7 @@ Now that we have the basic dotnet core app let's install VS Code to use as our I
         }
 ----
 
+The Startup class here is pretty basic, I just went with the default routing provided out of the box by MVC. You can add different route patterns or you can use attribute based routing if desired. 
 [source, c#]
 ----
     public class Startup
@@ -80,6 +85,7 @@ Now that we have the basic dotnet core app let's install VS Code to use as our I
     }
 ----
 
+The controller is a simple math function. Um, multiplication...
 [source, c#]
 ----
     public class CalculatorController : Controller
@@ -91,6 +97,7 @@ Now that we have the basic dotnet core app let's install VS Code to use as our I
     }
 ----
 
+The `project.json` lists the dependancies. In the most recent version of .NET Core, these `.json` files get upgraded to `.csproj` files 
 [source, json]
 ----
 {
