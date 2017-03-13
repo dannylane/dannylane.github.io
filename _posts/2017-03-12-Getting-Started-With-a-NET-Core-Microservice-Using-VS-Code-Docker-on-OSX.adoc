@@ -1,0 +1,151 @@
+= Getting Started With a .NET Core Microservice Using VS Code & Docker on OSX 
+:hp-tags: .net, core, docker, osx
+
+=== Install dotnet Core
+
+The instructions are link:https://www.microsoft.com/net/core#macos[here]
+
+[source, bash]
+----
+brew update
+brew install openssl
+mkdir -p /usr/local/lib
+ln -s /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib /usr/local/lib/
+ln -s /usr/local/opt/openssl/lib/libssl.1.0.0.dylib /usr/local/lib/
+----
+
+Install the .NET Core SDK from the page above.
+
+I had an issue after the install where the dotnet command wasn't exposed on my path. Found the following fix on one of the github issue link:https://github.com/dotnet/cli/issues/2544#issuecomment-220248063[comments]:
+
+[source, bash]
+----
+ln -s /usr/local/share/dotnet/dotnet /usr/local/bin
+----
+
+Some comments suggest it may be because I use link:http://ohmyz.sh/[oh-my-zsh].
+
+Once the sdk is setup successfully you can init a project:
+
+[source, bash]
+----
+mkdir dotnet-microservice
+cd dotnet-microservice
+dotnet new
+dotnet restore
+dotnet run
+----
+
+That should produce a simple `Hello World` output:
+
+image::dotnetcore/helloworld.png[]
+
+=== Install VS Code
+Now that we have the basic dotnet core app let's install VS Code to use as our IDE. The OSX download is available at link:https://code.visualstudio.com/[code.visualstudio.com]
+
+
+[source, c#]
+----
+        public static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+
+            var config = new ConfigurationBuilder()
+            .Build();
+
+            var builder = new WebHostBuilder()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseConfiguration(config)
+                .UseStartup<Startup>()
+                .UseKestrel()
+                .UseUrls("http://localhost:5000");
+
+            var host = builder.Build();
+            host.Run();
+        }
+----
+
+[source, c#]
+----
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvcCore();
+        }
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        {
+            app.UseMvcWithDefaultRoute();
+        }
+    }
+----
+
+[source, c#]
+----
+    public class CalculatorController : Controller
+    {
+        public string Multiply(int first, int second)
+        {
+            return (first * second).ToString();
+        }
+    }
+----
+
+[source, json]
+----
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.AspNetCore.Server.Kestrel": "1.1.0",
+    "Microsoft.AspNetCore.StaticFiles": "1.1.0",
+    "Microsoft.AspNetCore.Routing": "1.1.0",
+    "Microsoft.AspNetCore.Mvc.Core": "1.1.0",
+    "Microsoft.AspNetCore.Mvc": "1.1.0"
+  },
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.1.0"
+        }
+      },
+      "imports": "dnxcore50"
+    }
+  }
+}
+----
+
+image::dotnetcore/nugetextension.png[]
+
+image::https://raw.githubusercontent.com/KSubedi/net-core-project-manager/master/images/add.gif[]
+
+image::dotnetcore/vscoderestore.png[]
+
+
+image:
+
+=== Docker
+[source, dockerfile]
+----
+FROM microsoft/aspnetcore:1.0.1
+LABEL Name=dotnet-microservice Version=0.0.1 
+ARG source=.
+WORKDIR /app
+EXPOSE 5000
+COPY $source .
+ENTRYPOINT dotnet dotnet-microservice.dll
+----
+
+[source, bash]
+----
+docker build -f Dockerfile -t dotnet-microservice:latest .
+Sending build context to Docker daemon 518.1 kB
+Step 1/7 : FROM microsoft/aspnetcore:1.0.1
+1.0.1: Pulling from microsoft/aspnetcore
+----
+
