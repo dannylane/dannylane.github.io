@@ -3,7 +3,7 @@
 
 I've started working on some .NET Core microservices stuff and thought I'd outline the steps I took to get a basic instance of a .NET Core service up and running in Docker on OSX. 
 
-=== Install .NET Core
+==== Install .NET Core
 [%hardbreaks]
 The full instructions are link:https://www.microsoft.com/net/core#macos[here]
 First, install openssl using link:https://brew.sh/[Homebrew]
@@ -43,9 +43,29 @@ That should produce a simple `Hello World` output:
 
 image::dotnetcore/helloworld.png[]
 
-=== Install VS Code
+==== Install VS Code
 
 Now that we have the basic .NET Core app let's install VS Code to use as our IDE. The OSX download is available at link:https://code.visualstudio.com/[code.visualstudio.com]
+
+We need to add some nuget packages to the project so the first step is adding the Nuget package manager.
+
+Go to View -> Extensions and search for Nuget, the Docker extension is also useful for adding docker commands to VS Code.
+
+image::dotnetcore/nugetextension.png[]
+
+Once you have Nuget installed you can access Nuget commands in the command bar with F1:
+
+image::dotnetcore/commandbar.png[]
+
+image::https://raw.githubusercontent.com/KSubedi/net-core-project-manager/master/images/add.gif[]
+
+I added Kestrel and a couple of MVC nuget packages, you can see the list in the `project.json` file further down.
+
+Once you add a nuget package through the UI you will get prompted to restore (`dotnet restore` is the terminal command):
+
+image::dotnetcore/vscoderestore.png[]
+
+===== Some Code
 
 A microservice will normally expose a RESTful interface, to serve as the host we add a `WebHostBuilder` to the main method. Kestrel is a lightweight web server included in .NET Core. The `Startup` class is passed to the web host and allows you to define routing, DI and other services. The `ConfigurationBuilder` can be used to compile config settings from different sources; file, args, env, etc.
 [source, c#]
@@ -127,11 +147,7 @@ The `project.json` lists the dependancies. In the most recent version of .NET Co
 }
 ----
 
-image::dotnetcore/nugetextension.png[]
 
-image::https://raw.githubusercontent.com/KSubedi/net-core-project-manager/master/images/add.gif[]
-
-image::dotnetcore/vscoderestore.png[]
 
 
 image:
