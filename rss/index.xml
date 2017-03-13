@@ -1,4 +1,352 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Fri, 10 Mar 2017 21:42:06 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Extending EntityFramework Generated Model Classes With T4 Templates]]></title><description><![CDATA[<div class="paragraph">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 13 Mar 2017 23:58:41 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Getting Started With .NET Core Microservices Using Docker & VS Code on OSX]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ve started working on some .NET Core microservices stuff and thought I&#8217;d outline the steps I took to get a basic instance of a .NET Core service up and running in Docker on OSX.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_install_net_core">Install .NET Core</h4>
+<div class="paragraph">
+<p>The full instructions are <a href="https://www.microsoft.com/net/core#macos">here</a><br>
+First, install openssl using <a href="https://brew.sh/">Homebrew</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">brew update
+brew install openssl
+mkdir -p /usr/local/lib
+ln -s /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib /usr/local/lib/
+ln -s /usr/local/opt/openssl/lib/libssl.1.0.0.dylib /usr/local/lib/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Install the .NET Core SDK from the page above.</p>
+</div>
+<div class="paragraph">
+<p>I had an issue after the install where the dotnet command wasn&#8217;t exposed on my path. Found the following fix on one of the github issue <a href="https://github.com/dotnet/cli/issues/2544#issuecomment-220248063">comments</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">ln -s /usr/local/share/dotnet/dotnet /usr/local/bin</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Some comments suggest it may be because I use <a href="http://ohmyz.sh/">oh-my-zsh</a>.</p>
+</div>
+<div class="paragraph">
+<p>Once the sdk is setup successfully you can init a project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">mkdir dotnet-microservice
+cd dotnet-microservice
+dotnet new
+dotnet restore
+dotnet run</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That should produce a simple <code>Hello World</code> output:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/helloworld.png" alt="helloworld.png">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_install_vs_code">Install VS Code</h4>
+<div class="paragraph">
+<p>Now that we have the basic .NET Core app let&#8217;s install VS Code to use as our IDE. The OSX download is available at <a href="https://code.visualstudio.com/">code.visualstudio.com</a></p>
+</div>
+<div class="paragraph">
+<p>We need to add some nuget packages to the project so the first step is adding the Nuget package manager.</p>
+</div>
+<div class="paragraph">
+<p>Go to View &#8594; Extensions and search for Nuget, the Docker extension is also useful for adding docker commands to VS Code.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/nugetextension.png" alt="nugetextension.png">
+</div>
+</div>
+<div class="paragraph">
+<p>Once you have Nuget installed you can access Nuget commands in the command bar with F1:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/commandbar.png" alt="commandbar.png">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/KSubedi/net-core-project-manager/master/images/add.gif" alt="add.gif">
+</div>
+</div>
+<div class="paragraph">
+<p>I added Kestrel and a couple of MVC nuget packages, you can see the list in the <code>project.json</code> file further down.</p>
+</div>
+<div class="paragraph">
+<p>Once you add a nuget package through the UI you will get prompted to restore (<code>dotnet restore</code> is the terminal command):</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/vscoderestore.png" alt="vscoderestore.png">
+</div>
+</div>
+<div class="sect4">
+<h5 id="_some_code">Some Code</h5>
+<div class="paragraph">
+<p>A microservice will normally expose a RESTful interface, to serve as the host we add a <code>WebHostBuilder</code> to the main method. Kestrel is a lightweight web server included in .NET Core. The <code>Startup</code> class is passed to the web host and allows you to define routing, DI and other services. The <code>ConfigurationBuilder</code> can be used to compile config settings from different sources; file, args, env, etc.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">        public static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World!");
+
+            var config = new ConfigurationBuilder()
+            .Build();
+
+            var builder = new WebHostBuilder()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseConfiguration(config)
+                .UseStartup&lt;Startup&gt;()
+                .UseKestrel()
+                .UseUrls("http://localhost:5000");
+
+            var host = builder.Build();
+            host.Run();
+        }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Startup class here is pretty basic, I just went with the default routing provided out of the box by MVC. You can add different route patterns or you can use attribute based routing if desired.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvcCore();
+        }
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        {
+            app.UseMvcWithDefaultRoute();
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The controller is a simple math function. Um, multiplication&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">    public class CalculatorController : Controller
+    {
+        public string Multiply(int first, int second)
+        {
+            return (first * second).ToString();
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>project.json</code> lists the dependancies. In the most recent version of .NET Core, these <code>.json</code> files get upgraded to <code>.csproj</code> files</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.AspNetCore.Server.Kestrel": "1.1.0",
+    "Microsoft.AspNetCore.StaticFiles": "1.1.0",
+    "Microsoft.AspNetCore.Routing": "1.1.0",
+    "Microsoft.AspNetCore.Mvc.Core": "1.1.0",
+    "Microsoft.AspNetCore.Mvc": "1.1.0"
+  },
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.1.0"
+        }
+      },
+      "imports": "dnxcore50"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using <code>dotnet run</code> you can start the server:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/curl.png" alt="curl.png">
+</div>
+</div>
+<div class="paragraph">
+<p>The debug mode of VS Code lets you debug the application as you would expect:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/debug.png" alt="debug.png">
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_docker">Docker</h4>
+<div class="paragraph">
+<p>Now that we can run the service locally, lets add it to a docker container. The first step is to create a <code>dockerfile</code>. The Docker extension for VS Code has some commands built in:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/dockercommands.png" alt="dockercommands.png">
+</div>
+</div>
+<div class="paragraph">
+<p>This was the first version of my <code>dockerfile</code>, I&#8217;ll walk through some of the issues I had to troubleshoot further down.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-dockerfile" data-lang="dockerfile">FROM microsoft/aspnetcore:1.0.1
+LABEL Name=dotnet-microservice Version=0.0.1
+ARG source=.
+WORKDIR /app
+EXPOSE 5000
+COPY $source .
+ENTRYPOINT dotnet dotnet-microservice.dll</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Building my docker file from VS Code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">docker build -f Dockerfile -t dotnet-microservice:latest .
+Sending build context to Docker daemon 518.1 kB
+Step 1/7 : FROM microsoft/aspnetcore:1.0.1
+1.0.1: Pulling from microsoft/aspnetcore</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_base_image_vs_app_version_mismatch">Base image vs app version mismatch</h4>
+<div class="paragraph">
+<p>Running the docker container:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">▶ docker run -it --rm dotnet-microservice:latest
+The specified framework 'Microsoft.NETCore.App', version '1.1.0' was not found.
+  - Check application dependencies and target a framework version installed at:
+      /usr/share/dotnet/shared/Microsoft.NETCore.App
+  - The following versions are installed:
+      1.0.1
+  - Alternatively, install the framework version '1.1.0'.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>My first issue was the incorrect version of my app compared to the aspnetcore version I pulled down in my base image.</p>
+</div>
+<div class="paragraph">
+<p>I updated the base image in the dockerfile and rebuilt:
+<code>FROM microsoft/aspnetcore:1.1.0</code></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_copying_the_correct_folder">Copying the correct folder</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">▶ docker run -it --rm dotnet-microservice:latest
+Did you mean to run dotnet SDK commands? Please install dotnet SDK from:
+  http://go.microsoft.com/fwlink/?LinkID=798306&amp;clcid=0x409</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The issue this time turned out to be the <code>COPY</code> command wasn&#8217;t copying my build output to the working dir of the image.</p>
+</div>
+<div class="paragraph">
+<p><code>COPY $source/bin/Debug/netcoreapp1.1/ .</code></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_publishing_artifacts">Publishing artifacts</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">docker run -it --rm dotnet-microservice:latest
+Error: assembly specified in the dependencies manifest was not found -- package:
+'Microsoft.DotNet.PlatformAbstractions', version: '1.1.0', path: 'lib/netstandard
+1.3/Microsoft.DotNet.PlatformAbstractions.dll'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This time I realized I was copying the <code>build</code> output but I needed to be running a <code>publish</code> so that dependencies are included. I needed to run <code>dotnet publish</code> and change the <code>COPY</code> to pick up the published output.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">▶ dotnet publish
+Publishing dotnet-microservice for .NETCoreApp,Version=v1.1
+Project dotnet-microservice (.NETCoreApp,Version=v1.1) was previously compiled. S
+kipping compilation.
+publish: Published to /Users/danny/dev/dotnet-microservice/bin/Debug/netcoreapp1.
+1/publish
+Published 1/1 projects successfully</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>COPY $source/bin/Debug/netcoreapp1.1/publish .</code></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_port_forwarding">Port forwarding</h4>
+<div class="paragraph">
+<p>The <code>publish</code> did the trick, now I was able to run the docker container&#8230;&#8203; but not access the endpoint.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">▶ docker run -it --rm dotnet-microservice:latest
+Hello World!
+Hosting environment: Production
+Content root path: /app
+Now listening on: http://localhost:5000
+Application started. Press Ctrl+C to shut down.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I ran the docker container specifying <code>*</code> as the host to bind to and forwarding port 5000 on the container to post 5001 on my machine.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">▶ docker run -p 5001:5000 dotnet-microservice
+Hello World!
+Hosting environment: Production
+Content root path: /app
+Now listening on: http://*:5000
+Application started. Press Ctrl+C to shut down.</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/curl2.png" alt="curl2.png">
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s it, a simple microservice running on the .NET Core Kestrel server and packaged up in a docker image. It&#8217;s a basic structure for somethign that can be built upon in future.</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;ve included the terminal commands/output just in case others hit similar issues and hopefully the solutions above will help them.</p>
+</div>
+</div>]]></description><link>https://dannylane.github.io/2017/03/14/Getting-Started-With-NET-Core-Microservices-Using-Docker-VS-Code-on-OSX.html</link><guid isPermaLink="true">https://dannylane.github.io/2017/03/14/Getting-Started-With-NET-Core-Microservices-Using-Docker-VS-Code-on-OSX.html</guid><category><![CDATA[.net]]></category><category><![CDATA[ core]]></category><category><![CDATA[ docker]]></category><category><![CDATA[ osx]]></category><category><![CDATA[ vscode]]></category><category><![CDATA[ microservice]]></category><dc:creator><![CDATA[Danny Lane]]></dc:creator><pubDate>Tue, 14 Mar 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Extending EntityFramework Generated Model Classes With T4 Templates]]></title><description><![CDATA[<div class="paragraph">
 <p>I was working on a project recently where we used a common pattern for versioning DB records. Extending the EF generated model classes made it easier for the team to apply the pattern consistently.<br>
 I updated the generated code to render a generic interface if specific properties exist on the model. 2 helper methods (<code>Clone</code> &amp; <code>Update</code>) were added to the models and were regenerated whenever the model was refreshed.</p>
 </div>
