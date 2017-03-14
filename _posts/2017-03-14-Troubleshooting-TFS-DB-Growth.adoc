@@ -102,8 +102,7 @@ This is what is available through the UI, it is only a logical delete and while 
 *Destroy the build*
 This is the delete from the db. This is not available though the UI and is only available through the API
 
-I setup a build in TFS that runs at 3am every day and runs this scripts as part of the build.
- 
+.This is the script that I wrote to destroy the builds.
 [source,powershell]
 ----
 param ($serverName = 'http://<snip>:8080/tfs/DefaultCollection')
@@ -175,10 +174,24 @@ foreach ($project in $projects){
         }   
     }
 }
-
 ----
 
+.I added the script to a dummy project in source control.
+image::buildpurge/dummyproject.png[]
 
+.This project was set to run every morning at 3am
+image::buildpurge/schedule.png[]
+
+.The powershell script is set to run after the build
+image::buildpurge/script.png[]
+
+.The output from the script is available in the diagnostics tab of the build info from TFS.
+image::buildpurge/logs.png[]
+
+[%hardbreaks]
+The script could have been set to run as a scheduled task somewhere but I liked the idea of having it run within TFS as it made it easy for the dev team to monitor.
+
+The impact of destroying the old builds was significant.
 |===
 |TableName|SchemaName|RowCounts|TotalSpaceKB|UsedSpaceKB|UnusedSpaceKB
 |tbl_Content|dbo|69733|1889136|1869000|20136
