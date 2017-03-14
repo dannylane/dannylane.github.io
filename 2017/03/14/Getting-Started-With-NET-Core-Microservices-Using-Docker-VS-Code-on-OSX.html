@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1489450101248" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1489481946938" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/03/14/Getting-Started-With-NET-Core-Microservices-Using-Docker-VS-Code-on-OSX.html" />
     <meta name="referrer" content="origin" />
@@ -490,6 +490,17 @@ Application started. Press Ctrl+C to shut down.</code></pre>
 </div>
 </div>
 <div class="paragraph">
+<p>Curl confirms that there is nothing running on port 5000 and the container is exposed on port 5001.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/dockerps.png" alt="dockerps.png">
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>docker ps</code> command lists the running containers</p>
+</div>
+<div class="paragraph">
 <p>That&#8217;s it, a simple microservice running on the .NET Core Kestrel server and packaged up in a docker image. It&#8217;s a basic structure for somethign that can be built upon in future.</p>
 </div>
 <div class="paragraph">
@@ -540,7 +551,7 @@ Application started. Press Ctrl+C to shut down.</code></pre>
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1489450101248"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1489481946938"></script>
     
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
