@@ -267,6 +267,10 @@ Application started. Press Ctrl+C to shut down.
 ----
 
 image::dotnetcore/curl2.png[]
+Curl confirms that there is nothing running on port 5000 and the container is exposed on port 5001.
+
+image::dotnetcore/dockerps.png[]
+The `docker ps` command lists the running containers
 
 That's it, a simple microservice running on the .NET Core Kestrel server and packaged up in a docker image. It's a basic structure for somethign that can be built upon in future.
 
