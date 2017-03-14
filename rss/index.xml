@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 14 Mar 2017 00:08:21 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Getting Started With .NET Core Microservices Using Docker & VS Code on OSX]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 14 Mar 2017 08:59:06 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Getting Started With .NET Core Microservices Using Docker & VS Code on OSX]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I&#8217;ve started working on some .NET Core microservices stuff and thought I&#8217;d outline the steps I took to get a basic instance of a .NET Core service up and running in Docker on OSX.</p>
@@ -339,6 +339,17 @@ Application started. Press Ctrl+C to shut down.</code></pre>
 <div class="content">
 <img src="https://dannylane.github.io/images/dotnetcore/curl2.png" alt="curl2.png">
 </div>
+</div>
+<div class="paragraph">
+<p>Curl confirms that there is nothing running on port 5000 and the container is exposed on port 5001.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/dotnetcore/dockerps.png" alt="dockerps.png">
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>docker ps</code> command lists the running containers</p>
 </div>
 <div class="paragraph">
 <p>That&#8217;s it, a simple microservice running on the .NET Core Kestrel server and packaged up in a docker image. It&#8217;s a basic structure for somethign that can be built upon in future.</p>
