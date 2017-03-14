@@ -8,13 +8,13 @@
 As part of a project I was working on recently; I put in a lot of work around TFS Builds, Unit/Integration Tests & continous delivery using ReleaseManager.
 
 It was a fairly standard pipeline:
-→ Checkin → Unit & Integration Tests Run → Build → Release To Test
+→ Check in → Unit & Integration Tests Run → Build → Release To Test
 
-Up until this project the TFS Build hadn't been used, TFS was just used for source control and some workitem tracking, it was hosted on a VM and didn't take up much apce ********TODO The DB for TFS was a SQL express on the TFS VM (it has since been moved off to a physical server with DR)
+Up until this project TFS Build hadn't been used, TFS was just used for source control and some workitem tracking, it was hosted on a VM and space was never an issue. 
 
-After a few months of the project I started getting reports that the TFS VM size was growing constantly. IT had to increase the disk size on the VMs a couple of times.
+After a few months of the project I started getting reports that the TFS DB size was growing constantly. The IT team had to keep allocating more space to the disks used for storing the DB backups.
 
-It turns out that the VM had grown from ***TODO 
+It turns out that the `Tfs_DefaultCollection` had grown from about 6GB to over 50GB and the growth was constant.
 
 After doing a little research online I found the following query that gives some insight into which tables are taking up the most space in the db.
 
@@ -45,13 +45,22 @@ ORDER BY
     TotalSpaceKB desc
 ----
 
+.Tables taking up the most space
+|===
+|Table | Row Count | Size (GB) 
 
-**TODO table with high storage & explanation
+|tbl_TestResult | 367386 | 19.660805 
 
+|tbl_TestMessageLogEntry | 22354468 | 12.085457 
+
+|tbl_Content | 62475 | 4.4598694 
+
+|tbl_BuildInformation2 | 22736801 | 7.6754837 
+|===
 
 Normally TFS retains builds as defined by a build retention policy, ours tells it to only keep the last 10 builds.
 However, there is a known issue with the Microsoft Release Management 2013 that causes every build that is involved in a release to be retained indefinitely, this doesn't really fit with the continous delivery model and has been changed in newer versions.
-Every check in we do triggers a build which triggers a release so all our builds are retained.
+Every check in we do triggers a build which triggers a release *so all our builds are retained*.
  
 This has issues for the storage capacity on the drops folder where builds are dropped and also storage capacity in the database.
  
@@ -59,7 +68,27 @@ The issue was exacerbated for this project because of the logging setup in the i
 All this log info for each test run is stored in the TFS database which grew unmanageably.
 The logging was turned off on the automated builds so this should help keep the size down for newer builds
 
-** todo logmanager stuff for builds
+.The application logs are driven by a config file but for tests I set the logs to `ConsoleOut` in `[SetUpFixture]` as the log information is available for each Unit Test. When I realised that all the logging info was retained in the DB I replaced the `ConsoleOut` logger with a `NoOp` logger on the build server.
+[source, c#]
+----
+    public static class TestLogSetup
+    {
+        public static void Logger()
+        {
+            Console.WriteLine(Environment.MachineName);
+            if (Environment.MachineName.Contains("<ServerName>"))
+            {
+                Console.WriteLine("No Op Logger");
+                LogManager.Adapter = new Common.Logging.Simple.NoOpLoggerFactoryAdapter();
+            }
+            else
+            {
+                Console.WriteLine("Console Logger");
+                LogManager.Adapter = new Common.Logging.Simple.ConsoleOutLoggerFactoryAdapter();
+            }
+        }
+    }
+----
 
 To manage the retained builds I wrote a powershell script that does the following steps for every build older than 2 weeks:
 
