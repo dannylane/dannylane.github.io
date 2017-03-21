@@ -1,4 +1,304 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 14 Mar 2017 08:59:06 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Getting Started With .NET Core Microservices Using Docker & VS Code on OSX]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 21 Mar 2017 22:48:20 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Troubleshooting TFS DB Growth]]></title><description><![CDATA[<div class="paragraph">
+<p><strong>Spoiler:</strong> This was caused by ReleaseManager 2013 retaining builds. Read on for the work around that was put in place.</p>
+</div>
+<div class="paragraph">
+<p>As part of a project I was working on recently; I put in a lot of work around TFS Builds, Unit/Integration Tests &amp; continous delivery using ReleaseManager.</p>
+</div>
+<div class="paragraph">
+<p>It was a fairly standard pipeline:<br>
+→ Check in → Unit &amp; Integration Tests Run → Build → Release To Test</p>
+</div>
+<div class="paragraph">
+<p>Up until this project TFS Build hadn&#8217;t been used, TFS was just used for source control and some workitem tracking, it was hosted on a VM and space was never an issue.</p>
+</div>
+<div class="paragraph">
+<p>After a few months of the project I started getting reports that the TFS DB size was growing constantly. The IT team had to keep allocating more space to the disks used for storing the DB backups.</p>
+</div>
+<div class="paragraph">
+<p>It turns out that the <code>Tfs_DefaultCollection</code> had grown from about 6GB to over 50GB and the growth was constant.</p>
+</div>
+<div class="paragraph">
+<p>After doing a little research online I found the following query that gives some insight into which tables are taking up the most space in the db.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-sql" data-lang="sql">USE Tfs_DefaultCollection
+
+SELECT
+    t.NAME AS TableName,
+    s.Name AS SchemaName,
+    p.rows AS RowCounts,
+    SUM(a.total_pages) * 8 AS TotalSpaceKB,
+    SUM(a.used_pages) * 8 AS UsedSpaceKB,
+    (SUM(a.total_pages) - SUM(a.used_pages)) * 8 AS UnusedSpaceKB
+FROM
+    sys.tables t
+INNER JOIN
+    sys.indexes i ON t.OBJECT_ID = i.object_id
+INNER JOIN
+    sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
+INNER JOIN
+    sys.allocation_units a ON p.partition_id = a.container_id
+LEFT OUTER JOIN
+    sys.schemas s ON t.schema_id = s.schema_id
+GROUP BY
+    t.Name, s.Name, p.Rows
+ORDER BY
+    TotalSpaceKB desc</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 1. Tables taking up the most space</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Table</th>
+<th class="tableblock halign-left valign-top">Row Count</th>
+<th class="tableblock halign-left valign-top">Size (GB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_TestResult</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">367386</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">19.660805</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_TestMessageLogEntry</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">22354468</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">12.085457</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_Content</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">62475</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4.4598694</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_BuildInformation2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">22736801</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">7.6754837</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Normally TFS retains builds as defined by a build retention policy, ours tells it to only keep the last 10 builds.<br>
+However, there is a known issue with the Microsoft Release Management 2013 that causes every build that is involved in a release to be retained indefinitely, this doesn&#8217;t really fit with the continous delivery model and has been changed in newer versions.<br>
+Every check in we do triggers a build which triggers a release <strong>so all our builds are retained</strong>.</p>
+</div>
+<div class="paragraph">
+<p>This has issues for the storage capacity on the drops folder where builds are dropped and also storage capacity in the database.</p>
+</div>
+<div class="paragraph">
+<p>The issue was exacerbated for this project because of the logging setup in the integration tests. Each test class library gets a DB deployed and dropped and seed scripts run, all the logging from these activities is echoed to the console. The application logging is also set to console output.<br>
+All this log info for each test run is stored in the TFS database which grew unmanageably.<br>
+The logging was turned off on the automated builds so this should help keep the size down for newer builds</p>
+</div>
+<div class="listingblock">
+<div class="title">The application logs are driven by a config file but for tests I set the logs to <code>ConsoleOut</code> in <code>[SetUpFixture]</code> as the log information is available for each Unit Test. When I realised that all the logging info was retained in the DB I replaced the <code>ConsoleOut</code> logger with a <code>NoOp</code> logger on the build server.</div>
+<div class="content">
+<pre class="highlight"><code class="language-c#" data-lang="c#">    public static class TestLogSetup
+    {
+        public static void Logger()
+        {
+            Console.WriteLine(Environment.MachineName);
+            if (Environment.MachineName.Contains("&lt;ServerName&gt;"))
+            {
+                Console.WriteLine("No Op Logger");
+                LogManager.Adapter = new Common.Logging.Simple.NoOpLoggerFactoryAdapter();
+            }
+            else
+            {
+                Console.WriteLine("Console Logger");
+                LogManager.Adapter = new Common.Logging.Simple.ConsoleOutLoggerFactoryAdapter();
+            }
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To manage the retained builds I wrote a powershell script that does the following steps for every build older than 2 weeks:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Update the Retain Indefinitely flag to false</p>
+</li>
+<li>
+<p>Delete the build</p>
+</li>
+<li>
+<p>Destroy the build</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p><strong>Delete the build</strong><br>
+This is what is available through the UI, it is only a logical delete and while it does delete artifacts from the network drop folders, it does not delete rows from the db</p>
+</div>
+<div class="paragraph">
+<p><strong>Destroy the build</strong><br>
+This is the delete from the db. This is not available though the UI and is only available through the API</p>
+</div>
+<div class="listingblock">
+<div class="title">This is the script that I wrote to destroy the builds.</div>
+<div class="content">
+<pre class="highlight"><code class="language-powershell" data-lang="powershell">param ($serverName = 'http://&lt;snip&gt;:8080/tfs/DefaultCollection')
+
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Client")
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.Build.Client")
+[void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.TeamFoundation.VersionControl.Client")
+$tfs = [Microsoft.TeamFoundation.Client.TeamFoundationServerFactory]::GetServer($serverName)
+
+$buildServer =  $tfs.GetService([Microsoft.TeamFoundation.Build.Client.IBuildServer])
+$vcs =  $tfs.GetService([Microsoft.TeamFoundation.VersionControl.Client.VersionControlServer])
+
+$projects = $vcs.GetAllTeamProjects($true) # We will run this for all team projects
+
+foreach ($project in $projects){
+    Write-Host $project.Name
+
+    # Get all the build definitions for a given project
+    $buildDefs = $buildServer.QueryBuildDefinitions($project.Name)
+
+    foreach ($buildDef in $buildDefs){
+        Write-Host "-" + $buildDef.Name
+        # Delete all builds older than 14 days. This is a bit aggressive and can be pushed to a month once the logs are smaller on automated builds.
+        $endDate = (Get-Date).AddDays(-14)
+        # Keep going back until we hit dec 2014
+        while($endDate.Year -ge 2014){
+            $year = $endDate.Year
+            $month = $endDate.Month
+            write-host $year $month
+            # Create a search object for the project/build def
+            $buildDetailSpec = $buildServer.CreateBuildDetailSpec($project.Name, $buildDef.Name)
+            $startDate = $endDate.addMonths(-1)
+            $buildDetailSpec.MaxFinishTime = $endDate # Search criteria
+            $buildDetailSpec.MinFinishTime = $startDate # Search criteria
+            # only build info, not workitems, labels, etc
+            $buildDetailSpec.InformationTypes = $null
+
+            ## This is important for the query, builds that are deletd by retention
+            ## or the ui are only logically deleted, not destroyed in the db
+            $buildDetailSpec.QueryDeletedOption = [Microsoft.TeamFoundation.Build.Client.QueryDeletedOption]::IncludeDeleted
+
+            # Search all the things
+            $builds = $buildServer.QueryBuilds($buildDetailSpec)
+            if($builds.Builds.Length -ge 1){
+                Write-Host "before update" $builds.Builds
+                foreach($build in $builds.Builds){
+                    # Need to turn off the Keep Forever (Retain) flag set by Release Manager.
+                    if ($build.KeepForever -eq $true){
+                        Write-Host "Updating build " $build.Uri
+                        # Gets an updatable ref to the build
+                        $buildToEdit = $buildServer.GetBuild($build.Uri)
+                        # Edit the build flag
+                        $buildToEdit.KeepForever = $false;
+                        # save the build back to the tfs
+                        $buildServer.SaveBuilds(@($buildToEdit))
+                    }
+                }
+                # refresh the query given that some of the builds have been updated
+                $builds = $buildServer.QueryBuilds($buildDetailSpec)
+                Write-Host "after refresh" $builds.Builds
+                # Delete the build, test results, symbols, drop, etc.
+                $buildServer.DeleteBuilds($builds.Builds,
+                [Microsoft.TeamFoundation.Build.Client.DeleteOptions]::All)
+                # Destroy the db records
+                $buildServer.DestroyBuilds($builds.Builds)
+            }
+            # rolling back the years.
+            $endDate = $endDate.addMonths(-1)
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/buildpurge/dummyproject.png" alt="dummyproject.png">
+</div>
+<div class="title">Figure 1. I added the script to a dummy project in source control.</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/buildpurge/schedule.png" alt="schedule.png">
+</div>
+<div class="title">Figure 2. This project was set to run every morning at 3am</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/buildpurge/script.png" alt="script.png">
+</div>
+<div class="title">Figure 3. The powershell script is set to run after the build</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/buildpurge/logs.png" alt="logs.png">
+</div>
+<div class="title">Figure 4. The output from the script is available in the diagnostics tab of the build info from TFS.</div>
+</div>
+<div class="paragraph">
+<p>The script could have been set to run as a scheduled task somewhere but I liked the idea of having it run within TFS as it made it easy for the dev team to monitor.</p>
+</div>
+<div class="paragraph">
+<p>The impact of destroying the old builds was significant.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Table</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Row Count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Size (GB)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_Content</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">69733</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.889136</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_TestResult</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">174868</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.323192</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_LocalVersion</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">413449</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.122072</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_BuildCodeChange</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">148950</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.078016</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_Version</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">101484</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.068872</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_BuildInformation2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">88673</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.064232</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tbl_Command</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">92974</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.039192</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Tracking down the cause of the size increase was an interesting exercise, hopefully some of this detail may help someone else in future.</p>
+</div>]]></description><link>https://dannylane.github.io/2017/03/22/Troubleshooting-TFS-DB-Growth.html</link><guid isPermaLink="true">https://dannylane.github.io/2017/03/22/Troubleshooting-TFS-DB-Growth.html</guid><category><![CDATA[TFS]]></category><category><![CDATA[ ReleaseManager]]></category><dc:creator><![CDATA[Danny Lane]]></dc:creator><pubDate>Wed, 22 Mar 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Getting Started With .NET Core Microservices Using Docker & VS Code on OSX]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>I&#8217;ve started working on some .NET Core microservices stuff and thought I&#8217;d outline the steps I took to get a basic instance of a .NET Core service up and running in Docker on OSX.</p>
