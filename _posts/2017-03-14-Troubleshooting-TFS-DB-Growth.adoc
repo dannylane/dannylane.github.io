@@ -209,15 +209,8 @@ The impact of destroying the old builds was significant.
 |tbl_Command|92974|0.039192
 |===
 
-++ You can see the output from the script in the Diagnostics tab from the build:
-++ This is where the script is configured: 
-++ This is the build trigger:
+Tracking down the cause of the size increase was an interesting exercise, hopefully some of this detail may help someone else in future.
 
-
-
-
-
-image::buildpurge/dummyproject.png[]
 
 
  
