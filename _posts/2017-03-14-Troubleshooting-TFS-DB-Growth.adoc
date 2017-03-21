@@ -193,20 +193,20 @@ The script could have been set to run as a scheduled task somewhere but I liked 
 
 The impact of destroying the old builds was significant.
 |===
-|TableName|SchemaName|RowCounts|TotalSpaceKB|UsedSpaceKB|UnusedSpaceKB
-|tbl_Content|dbo|69733|1889136|1869000|20136
+| Table | Row Count | Size (GB)
+|tbl_Content|69733|1.889136
 
-|tbl_TestResult|dbo|174868|323192|321504|1688
+|tbl_TestResult|174868|0.323192
 
-|tbl_LocalVersion|dbo|413449|122072|120048|2024
+|tbl_LocalVersion|413449|0.122072
 
-|tbl_BuildCodeChange|dbo|148950|78016|77824|192
+|tbl_BuildCodeChange|148950|0.078016
 
-|tbl_Version|dbo|101484|68872|68544|328
+|tbl_Version|101484|0.068872
 
-|tbl_BuildInformation2|dbo|88673|64232|63512|720
+|tbl_BuildInformation2|88673|0.064232
 
-|tbl_Command|dbo|92974|39192|38928|264
+|tbl_Command|92974|0.039192
 |===
 
 ++ You can see the output from the script in the Diagnostics tab from the build:
