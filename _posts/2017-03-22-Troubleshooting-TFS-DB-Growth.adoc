@@ -1,6 +1,6 @@
 = Troubleshooting TFS DB Growth
 :hp-tags: TFS, ReleaseManager
-:published_at: 2017-03-14
+:published_at: 2017-03-22
 :hardbreaks:
 
 *Spoiler:* This was caused by ReleaseManager 2013 retaining builds. Read on for the work around that was put in place.
