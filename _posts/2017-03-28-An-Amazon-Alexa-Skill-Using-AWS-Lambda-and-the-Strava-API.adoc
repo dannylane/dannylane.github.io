@@ -252,6 +252,8 @@ I used the https://github.com/dustedrob/JStrava[JStrava] library for querying th
 	}
 ----
 
+_Yes, I was being lazy and inserted the type into the response directly, so run is spoken instead of the past tense._
+
 ===== Speech Synthesis Markup Language 
 Alexa alows you to tailor how the response is delivered (spoken) to the user using https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference[SSML]
 
@@ -330,5 +332,38 @@ The request/response for the request to 'ask Strider *Tell me my activities yest
 .The audio file that Alexa generates for the SSML above is the one I linked to at the top of the post:
 audio::alexa/MyActivity.mp3?raw=true[options=""]
 
-.For debugging purposes its useful that any logs you write with the app are stored in CloudWatch 
+*Friend Query*
+
+.A request for the utterance *Who was active* results in a different intent being delivered to the endpoint:
+[source, json]
+----
+    "intent": {
+      "name": "WhoWasActive",
+      "slots": {
+        "ActivityType": {
+          "name": "ActivityType"
+        }
+      }
+    }
+----
+
+.And the response is for one of the people I follow
+[source, json]
+----
+  "response": {
+    "outputSpeech": {
+      "type": "SSML",
+      "ssml": "Brian McCarthy Ride <say-as interpret-as=\"unit\">31.0km</say-as> in <say-as interpret-as=\"unit\">1hours</say-as><say-as interpret-as=\"unit\">0minutes</say-as>"
+    },
+    "shouldEndSession": true
+  }
+----
+
+.The SSML for the response above sounds like this:
+audio::alexa/FriendActivity.mp3?raw=true[options=""]
+
+
+===== Logging
+.Lambda http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html[supports] Log4j and `LambdaLogger`, the logging output is available in AWS CloudWatch
+
 image:alexa/CloudWatchLogs.png[]
