@@ -236,13 +236,41 @@ I used the https://github.com/dustedrob/JStrava[JStrava] library for querying th
 	}
 ----
 
+.Formatting the response for Alexa using SSML
+[source, java]
+----
+	private String responseFormat = "%1$s %2$s <say-as interpret-as=\"unit\">%3$.1fkm</say-as> "
+			+ "in <say-as interpret-as=\"unit\">%4$dhours</say-as>"
+			+ "<say-as interpret-as=\"unit\">%5$dminutes</say-as>";
+   	
+    private String FormatActivity(Activity activity) {
+		double km = activity.getDistance() / 1000;
+		int hours = activity.getElapsed_time() / 3600;
+		int minutes = (activity.getElapsed_time() % 3600) / 60;
+
+		return String.format(responseFormat, activity.getAthlete().toString(), activity.getType(), km, hours, minutes);
+	}
+----
+
+===== Speech Synthesis Markup Language 
+Alexa alows you to tailor how the response is delivered (spoken) to the user using https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference[SSML]
+
+.A response for one of my activities looks like this
+[source, json]
+----
+    "outputSpeech": {
+      "type": "SSML",
+      "ssml": "Danny Lane Run <say-as interpret-as=\"unit\">16.2km</say-as> in <say-as interpret-as=\"unit\">1hours</say-as><say-as interpret-as=\"unit\">8minutes</say-as>"
+    },
+----
 
 ===== Result
+There code above is all very agricultural but it's enough to get a response from Alexa. To test the Skill you can input an utterance from the test page and see the request that goes to your app (see the session token and how the slots/intent are broken up) and you can see the response also.
+
 .To test the skill you can use the Service Simulator from the *Test* tab.
 image:alexa/ServiceSimulator.png[]
 
-.Logs are available for the Lambda function in AWS CloudWatch. 
-image:alexa/CloudWatchLogs.png[]
+The request/response for the request
 
 
 [source,json]
@@ -297,3 +325,6 @@ image:alexa/CloudWatchLogs.png[]
   "sessionAttributes": {}
 }
 ----
+
+.Logs are available for the Lambda function in AWS CloudWatch. 
+image:alexa/CloudWatchLogs.png[]
