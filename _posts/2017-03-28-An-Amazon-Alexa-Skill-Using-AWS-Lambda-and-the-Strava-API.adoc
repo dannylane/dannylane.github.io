@@ -120,6 +120,61 @@ image:alexa/5.eclipse.png[]
 ==== Code
 I used the https://github.com/amzn/alexa-skills-kit-java[alexa-skills-kit-java] library from Amazon for taking care of a lot of the boilerplate.
 
+The entry point to the code is the `RequestStreamHandler`, this is the handler defined in the Skill config:
+
+[source, java]
+----
+public class StriderSpeechletRequestStreamHandler extends SpeechletRequestStreamHandler {
+	private static final Set<String> supportedApplicationIds = new HashSet<String>();
+	static {
+		/*
+		 * This Id can be found on https://developer.amazon.com/edw/home.html#/
+		 * "Edit" the relevant Alexa Skill and put the relevant Application Ids
+		 * in this Set.
+		 */
+		supportedApplicationIds.add("amzn1.ask.skill.<snip>");
+	}
+
+	public StriderSpeechletRequestStreamHandler() {
+		super(new StriderSpeechlet(), supportedApplicationIds);
+	}
+}
+----
+
+The `StriderSpeechlet implements Speechlet` class is where you handle events like `onLaunch`, `onIntent`, `onSessionEnded`, etc.
+
+.This is a pretty quick and dirty onIntent handler, a production ready version could conside investing in Spring DI configured.
+[source, java]
+----
+	@Override
+	public SpeechletResponse onIntent(final IntentRequest request, final Session session) throws SpeechletException {
+		IExecuteQuery query = null;
+		Intent intent = request.getIntent();
+		String intentName = (intent != null) ? intent.getName() : null;
+		String intentDate = getSlotValue(intent, "Date");
+		String intentDirection = getSlotValue(intent, "Direction");
+		String token = session.getUser().getAccessToken();
+		
+		try {
+			if ("WhoWasActive".equals(intentName)) {
+				query = new FollowerQuery(token, intentDate);
+			} else if ("MyTraining".equals(intentName)) {
+				query = new SelfQuery(token, intentDirection, intentDate);
+			} else if ("AMAZON.HelpIntent".equals(intentName)) {
+				// TODO help me mario !!!
+			} else {
+				throw new SpeechletException("Invalid Intent");
+			}
+		} catch (Exception e) {
+			throw new SpeechletException(e.getMessage());
+		}
+
+		SsmlOutputSpeech speech = new SsmlOutputSpeech();
+		speech.setSsml(query.Execute().get(0));
+
+		return SpeechletResponse.newTellResponse(speech);
+	}
+----
 
 ===== Result
 .To test the skill you can use the Service Simulator from the *Test* tab.
