@@ -37,12 +37,12 @@ image:alexa/5.Lambda.png[]
 .You need to specify what the handler of your skill will be, this is the Java method.
 image:alexa/LambdaConfig.png[]
 
-==== Skill COnfiguration
-Once the skill is set up and up and you have an http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html[Amazon Resource Name (ARN)] to reference your Lambda function, you can set up your Skill to point at it.
+==== Skill Configuration
+Once the skill is set up and you have an http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html[Amazon Resource Name (ARN)] to reference your Lambda function, you can set up your Skill to point at it.
 
 You create a Skill from the http://developer.amazon.com[developer.amazon.com] portal
 
-.*Skill Information* allows you to set the name of your skill and the name your users will use to invoke the skill (the invocation Name)
+.*Skill Information* allows you to set the name of your skill and the name your users will use to invoke the skill (the invocation name)
 image:alexa/SkillInformation.png[]
 
 .*Interaction Model* is where most of the configuration for how users will speak to your skillis defined.
@@ -143,7 +143,7 @@ public class StriderSpeechletRequestStreamHandler extends SpeechletRequestStream
 
 The `StriderSpeechlet implements Speechlet` class is where you handle events like `onLaunch`, `onIntent`, `onSessionEnded`, etc.
 
-.This is a pretty quick and dirty onIntent handler, a production ready version could conside investing in Spring DI configured.
+.This is a pretty quick and dirty onIntent handler, a production ready version could consider investing in getting Spring DI configured.
 [source, java]
 ----
 	@Override
@@ -367,3 +367,8 @@ audio::alexa/FriendActivity.mp3?raw=true[options=""]
 .Lambda http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html[supports] Log4j and `LambdaLogger`, the logging output is available in AWS CloudWatch
 
 image:alexa/CloudWatchLogs.png[]
+
+===== Submission
+There is a rigerous approval process in place for Alexa Skills, I would need to improve a lot of areas of the code to make it robust enough to handle any level of testing so this may never see the light of day!
+
+Thanks for reading.
