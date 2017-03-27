@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 27 Mar 2017 23:43:30 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 27 Mar 2017 23:52:24 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
@@ -59,15 +59,15 @@ There&#8217;s going to be lots of screenshots <em>(boo)</em> of the AWS consoles
 </div>
 </div>
 <div class="sect3">
-<h4 id="_skill_configuration">Skill COnfiguration</h4>
+<h4 id="_skill_configuration">Skill Configuration</h4>
 <div class="paragraph">
-<p>Once the skill is set up and up and you have an <a href="http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html">Amazon Resource Name (ARN)</a> to reference your Lambda function, you can set up your Skill to point at it.</p>
+<p>Once the skill is set up and you have an <a href="http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html">Amazon Resource Name (ARN)</a> to reference your Lambda function, you can set up your Skill to point at it.</p>
 </div>
 <div class="paragraph">
 <p>You create a Skill from the <a href="http://developer.amazon.com">developer.amazon.com</a> portal</p>
 </div>
 <div class="paragraph">
-<div class="title"><strong>Skill Information</strong> allows you to set the name of your skill and the name your users will use to invoke the skill (the invocation Name)</div>
+<div class="title"><strong>Skill Information</strong> allows you to set the name of your skill and the name your users will use to invoke the skill (the invocation name)</div>
 <p><span class="image"><img src="https://dannylane.github.io/images/alexa/SkillInformation.png" alt="SkillInformation.png"></span></p>
 </div>
 <div class="paragraph">
@@ -188,7 +188,7 @@ There are built in slots like <code>AMAZON.DATE</code> and you can create custom
 <p>The <code>StriderSpeechlet implements Speechlet</code> class is where you handle events like <code>onLaunch</code>, <code>onIntent</code>, <code>onSessionEnded</code>, etc.</p>
 </div>
 <div class="listingblock">
-<div class="title">This is a pretty quick and dirty onIntent handler, a production ready version could conside investing in Spring DI configured.</div>
+<div class="title">This is a pretty quick and dirty onIntent handler, a production ready version could consider investing in getting Spring DI configured.</div>
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">	@Override
 	public SpeechletResponse onIntent(final IntentRequest request, final Session session) throws SpeechletException {
@@ -434,6 +434,15 @@ Your browser does not support the audio tag.
 <div class="paragraph">
 <div class="title">Lambda <a href="http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html">supports</a> Log4j and <code>LambdaLogger</code>, the logging output is available in AWS CloudWatch</div>
 <p><span class="image"><img src="https://dannylane.github.io/images/alexa/CloudWatchLogs.png" alt="CloudWatchLogs.png"></span></p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_submission">Submission</h5>
+<div class="paragraph">
+<p>There is a rigerous approval process in place for Alexa Skills, I would need to improve a lot of areas of the code to make it robust enough to handle any level of testing so this may never see the light of day!</p>
+</div>
+<div class="paragraph">
+<p>Thanks for reading.</p>
 </div>
 </div>
 </div>]]></description><link>https://dannylane.github.io/2017/03/28/An-Amazon-Alexa-Skill-Using-AWS-Lambda-and-the-Strava-API.html</link><guid isPermaLink="true">https://dannylane.github.io/2017/03/28/An-Amazon-Alexa-Skill-Using-AWS-Lambda-and-the-Strava-API.html</guid><category><![CDATA[AWS]]></category><category><![CDATA[ Alexa]]></category><category><![CDATA[ Lambda]]></category><category><![CDATA[ Strava]]></category><category><![CDATA[ API]]></category><dc:creator><![CDATA[Danny Lane]]></dc:creator><pubDate>Tue, 28 Mar 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Troubleshooting TFS DB Growth]]></title><description><![CDATA[<div class="paragraph">
