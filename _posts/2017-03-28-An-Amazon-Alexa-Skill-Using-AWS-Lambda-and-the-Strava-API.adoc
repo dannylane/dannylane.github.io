@@ -1,6 +1,15 @@
 = An Amazon Alexa Skill Using AWS Lambda and the Strava API
 :published_at: 2017-03-28
-:hp-tags: AWS, Alexa, Lambda, API
+:hp-tags: AWS, Alexa, Lambda, Strava, API
+
+image::alexa/header.png[]
+
+*TL;DR:* I built an Amazon Alexa voice skill on AWS Lambda using the Strava API (and OAuth)
+
+I got an Amazon Echo as a Christmas present (to myself...) and have been really impressed with it. I expected it to be a geek toy that nobody else in the house would use but it gets used a lot by other family members for things like spotify and interactive games (my 4 year old likes to try and beat Alexa at 20 questions!). I think the reason that it has gained such traction in our home is down to the quality of the voice interaction.
+
+I wanted to see how difficult it would be 
+
 
 audio::alexa/MyActivity.mp3?raw=true[options=""]
 
@@ -9,4 +18,57 @@ audio::alexa/MyActivity.mp3?raw=true[options=""]
 
 [[img-project]]
 .EnttityVersion.ttinclude
-image::t4/project.png[]
+
+
+[source,json]
+----
+{
+  "session": {
+    "sessionId": "SessionId.48080c4d-897a-4f8e-a56d-0e4837cffef5",
+    "application": {
+      "applicationId": "amzn1.ask.skill.97d9161c-ed58-46f5-a541-84ee614b93a2"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AFTLYV3WAVFQVRLJNQEBAXYOTC4QQPIRISHULXQGJ2RBZVHRA3USMNVVGJCUKKKMLBCGZ7IAESAR3PF5BWPKIHN7HNSNN7BN2MCFKKXQFJZAJIL4F4BU2ZTZ2WFUMNV4SXPOL5AIXXZTRP7FZQ37BNVKOQQOKWZKQGBRHLV5SCPKKH2FIBZ4BZRGGSJEVXGVY5NW52GVWCXYVTY",
+      "accessToken": "b425703657abf7e8294e1dd1a3430116ee72d031"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.a47ee711-2e62-4cee-ac7c-b3fa2e9b6859",
+    "locale": "en-GB",
+    "timestamp": "2017-03-27T20:32:51Z",
+    "intent": {
+      "name": "MyTraining",
+      "slots": {
+        "Direction": {
+          "name": "Direction",
+          "value": "before"
+        },
+        "Date": {
+          "name": "Date",
+          "value": "2017-03-26"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
+----
+
+[source,json]
+----
+{
+  "version": "1.0",
+  "response": {
+    "outputSpeech": {
+      "type": "SSML",
+      "ssml": "Danny Lane Run <say-as interpret-as=\"unit\">16.2km</say-as> in <say-as interpret-as=\"unit\">1hours</say-as><say-as interpret-as=\"unit\">8minutes</say-as>"
+    },
+    "shouldEndSession": true
+  },
+  "sessionAttributes": {}
+}
+----
