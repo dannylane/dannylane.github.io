@@ -100,8 +100,10 @@ Once the user authorizes the skill, Amazon takes care of requesting and refreshi
 
 ==== AWS Eclipse Plugin
 
+There is an AWS Plugin for Eclipse available http://docs.aws.amazon.com/toolkit-for-eclipse/v1/user-guide/setup-install.html[here].
 
 
+===== Result
 .To test the skill you can use the Service Simulator from the *Test* tab.
 image:alexa/ServiceSimulator.png[]
 
