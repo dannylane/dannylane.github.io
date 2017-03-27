@@ -8,16 +8,66 @@ image::alexa/header.png[]
 
 I got an Amazon Echo as a Christmas present (to myself...) and have been really impressed with it. I expected it to be a geek toy that nobody else in the house would use but it gets used a lot by other family members for things like spotify and interactive games (my 4 year old likes to try and beat Alexa at 20 questions!). I think the reason that it has gained such traction in our home is down to the quality of the voice interaction.
 
-I wanted to see how difficult it would be 
+I wanted to see how difficult it would be it write an app (Skill) for Alexa. I use http://strava.com[Strava] a lot so I decided to see how difficult it would be to get a Skill to consume the API. I've outlined the steps in setting up the Skill and some of the code used to query the API.
 
-
+.Before I get started, this is an example of the response from the skill: 
 audio::alexa/MyActivity.mp3?raw=true[options=""]
-
-
 [%hardbreaks]
+_Disclaimer_
+There's going to be lots of screenshots _(boo)_ of the AWS consoles for the first half of this post. The `code` _(yay)_ is towards the end.
 
-[[img-project]]
-.EnttityVersion.ttinclude
+==== AWS Lambda
+The first step is to create a Lambda function that will host the endpoint for the Skill. 
+
+.There are some templates available but I just started with a blank function.
+image:alexa/1.Lambda.png[]
+
+.The second step allows you to select the triggers that will invoke your serverless function
+image:alexa/2.Lambda.png[]
+
+.There are a number of predefined options available, choose the "Alexa Skills Kit" option
+image:alexa/3.Lambda.png[]
+
+.Once a valid trigger is selected you can procede to the next step
+image:alexa/4.Lambda.png[]
+
+.I chose the Java 8 Runtime but you can chose C#, Node, etc.
+image:alexa/5.Lambda.png[]
+
+.You need to specify what the handler of your skill will be, this is the Java method.
+image:alexa/LambdaConfig.png[]
+
+==== Skill COnfiguration
+Once the skill is set up and up and you have an http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html[Amazon Resource Name (ARN)] to reference your Lambda function, you can set up your Skill to point at it.
+
+You create a Skill from the http://developer.amazon.com[developer.amazon.com] portal
+
+.*Skill Information* allows you to set the name of your skill and the name your users will use to invoke the skill (the invocation Name)
+image:alexa/SkillInformation.png[]
+
+.*Interaction Model* is where most of the configuration for how users will speak to your skillis defined.
+image:alexa/InteractionModel.png[]
+
+The interaction model is made up of *Intents*, *Slots* and *Utterances*. 
+I defined 2 intents, one to allow a user to query their own activities and the other to query their friends activities.
+
+For more info see the https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interaction-model-reference[docs]
+
+
+
+
+.Title
+image:alexa/Configuration.png[]
+.Title
+image:alexa/AccountLinking.png[]
+
+.Title
+image:alexa/CloudWatchLogs.png[]
+.Title
+image:alexa/LambdaTrigger.png[]
+.Title
+image:alexa/ServiceSimulator.png[]
+
 
 
 [source,json]
