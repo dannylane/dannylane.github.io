@@ -48,26 +48,65 @@ image:alexa/SkillInformation.png[]
 .*Interaction Model* is where most of the configuration for how users will speak to your skillis defined.
 image:alexa/InteractionModel.png[]
 
+[%hardbreaks]
 The interaction model is made up of *Intents*, *Slots* and *Utterances*. 
 I defined 2 intents, one to allow a user to query their own activities and the other to query their friends activities.
 
+[source, json]
+----
+{
+  "intents": [
+    {
+      "slots": [
+        {
+          "name": "ActivityType",
+          "type": "LIST_OF_ACTIVITIES"
+        }
+      ],
+      "intent": "WhoWasActive"
+    },
+    {
+      "slots": [
+        {
+          "name": "Direction",
+          "type": "LIST_OF_DIRECTIONS"
+        },
+        {
+          "name": "Date",
+          "type": "AMAZON.DATE"
+        }
+      ],
+      "intent": "MyTraining"
+    }
+  ]
+}
+----
+
+Slots are like variables that Amazon extracts from the users request based on how the user invokes the intent.
+There are built in slots like `AMAZON.DATE` and you can create custom slots too, `LIST_OF_ACTIVITIES` is a custom slot I defined.
+
 For more info see the https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interaction-model-reference[docs]
 
-
-
-
-.Title
+.*Configuration* The configuration step allows you to set your AWS Lambda ARN or else configure your own enpoint
 image:alexa/Configuration.png[]
-.Title
+
+.*Account Linking* The account linking is where you can set up an OAuth client token request.
 image:alexa/AccountLinking.png[]
 
-.Title
-image:alexa/CloudWatchLogs.png[]
-.Title
-image:alexa/LambdaTrigger.png[]
-.Title
+Making the skill work with the Strava OAuth took a while to configure correctly but didn't require any code which was nice. Once this config is setup users get prompted to authorise the app from their Strava account
+image:alexa/stravaAuth.png[]
+
+Once the user authorizes the skill, Amazon takes care of requesting and refreshing the auth token. The token is supplied to your request handler with every invocation of the skill and you pass the token through to the API call. Painless.
+
+==== AWS Eclipse Plugin
+
+
+
+.To test the skill you can use the Service Simulator from the *Test* tab.
 image:alexa/ServiceSimulator.png[]
 
+.Logs are available for the Lambda function in AWS CloudWatch. 
+image:alexa/CloudWatchLogs.png[]
 
 
 [source,json]
