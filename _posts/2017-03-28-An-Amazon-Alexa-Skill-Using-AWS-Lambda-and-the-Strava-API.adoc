@@ -1,0 +1,10 @@
+= An Amazon Alexa Skill Using AWS Lambda and the Strava API
+:published_at: 2017-03-28
+:hp-tags: AWS, Alexa, Lambda, API
+
+
+[%hardbreaks]
+
+[[img-project]]
+.EnttityVersion.ttinclude
+image::t4/project.png[]
