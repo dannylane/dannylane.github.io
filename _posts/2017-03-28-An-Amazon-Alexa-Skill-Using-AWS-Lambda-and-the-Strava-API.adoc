@@ -85,6 +85,9 @@ I defined 2 intents, one to allow a user to query their own activities and the o
 Slots are like variables that Amazon extracts from the users request based on how the user invokes the intent.
 There are built in slots like `AMAZON.DATE` and you can create custom slots too, `LIST_OF_ACTIVITIES` is a custom slot I defined.
 
+The *Sample Utterances* are where you list the ways you expect users to interact with your skill. You associate utterances with Intents in this section aswell as adding your slots as tokens.
+For example, if a user spoke _Who Ran_ or _Who Cycyled_ they would both match the utterance `WhoWasActive Who {ActivityType}`. The Intent that would be requested form your endpoint would be `WhoWasActive` and the `Slot` would contain an `ActivityType` of _Ran_ or _Cycled_.
+
 For more info see the https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interaction-model-reference[docs]
 
 .*Configuration* The configuration step allows you to set your AWS Lambda ARN or else configure your own enpoint
