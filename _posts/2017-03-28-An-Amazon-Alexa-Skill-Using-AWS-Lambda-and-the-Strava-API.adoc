@@ -102,6 +102,24 @@ Once the user authorizes the skill, Amazon takes care of requesting and refreshi
 
 There is an AWS Plugin for Eclipse available http://docs.aws.amazon.com/toolkit-for-eclipse/v1/user-guide/setup-install.html[here].
 
+.The plugin exposes various AWS interfaces through Eclipse. 
+image:alexa/1.eclipse.png[]
+
+.From the context menu of a project it is a simple wizard to upload a function to an existing Lambda.
+image:alexa/2.eclipse.png[]
+
+.Once associated with your account you can select which function to upload to
+image:alexa/3.eclipse.png[]
+
+.Configuration settings can be updated before the deployment
+image:alexa/4.eclipse.png[]
+
+.The plugin then packages up the project and pushes it to the S3 bucket that backs the Lambda function
+image:alexa/5.eclipse.png[]
+
+==== Code
+I used the https://github.com/amzn/alexa-skills-kit-java[alexa-skills-kit-java] library from Amazon for taking care of a lot of the boilerplate.
+
 
 ===== Result
 .To test the skill you can use the Service Simulator from the *Test* tab.
