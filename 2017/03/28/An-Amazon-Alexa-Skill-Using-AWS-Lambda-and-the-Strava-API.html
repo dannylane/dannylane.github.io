@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>An Amazon Alexa Skill Using AWS Lambda and the Strava API - Danny Lane</title>
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <meta name="description" content="">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="An Amazon Alexa Skill Using AWS Lambda and the Strava API">
+    <meta name="twitter:description" content="">
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="An Amazon Alexa Skill Using AWS Lambda and the Strava API">
+    <meta property="og:description" content="">
+
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
+
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1490658210780" />
+
+    <link rel="canonical" href="https://dannylane.github.io/2017/03/28/An-Amazon-Alexa-Skill-Using-AWS-Lambda-and-the-Strava-API.html" />
+    <meta name="referrer" content="origin" />
+    
+    <meta property="og:site_name" content="Danny Lane" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="An Amazon Alexa Skill Using AWS Lambda and the Strava API" />
+    <meta property="og:description" content="TL;DR: I built an Amazon Alexa voice skill on AWS Lambda using the Strava API (and OAuth) I got an Amazon Echo as a Christmas present (to myself&amp;#8230;&amp;#8203;) and have been really impressed with it. I expected it to be a geek toy that nobody else in" />
+    <meta property="og:url" content="https://dannylane.github.io/2017/03/28/An-Amazon-Alexa-Skill-Using-AWS-Lambda-and-the-Strava-API.html" />
+    <meta property="article:tag" content="AWS" />
+    <meta property="article:tag" content=" Alexa" />
+    <meta property="article:tag" content=" Lambda" />
+    <meta property="article:tag" content=" Strava" />
+    <meta property="article:tag" content=" API" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="An Amazon Alexa Skill Using AWS Lambda and the Strava API" />
+    <meta name="twitter:description" content="TL;DR: I built an Amazon Alexa voice skill on AWS Lambda using the Strava API (and OAuth) I got an Amazon Echo as a Christmas present (to myself&amp;#8230;&amp;#8203;) and have been really impressed with it. I expected it to be a geek toy that nobody else in" />
+    <meta name="twitter:url" content="https://dannylane.github.io/2017/03/28/An-Amazon-Alexa-Skill-Using-AWS-Lambda-and-the-Strava-API.html" />
+    
+    <script type="application/ld+json">
+null
+    </script>
+
+    <meta name="generator" content="HubPress" />
+    <link rel="alternate" type="application/rss+xml" title="Danny Lane" href="https://dannylane.github.io/rss/" />
+
+</head>
+<body class="post-template tag-AWS tag-Alexa tag-Lambda tag-Strava tag-API no-js">
+
+    <span class="mobile btn-mobile-menu">
+        <i class="icon icon-list btn-mobile-menu__icon"></i>
+        <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+
+    <header class="panel-cover panel-cover--collapsed " style="background-image: url(https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png)">
+      <div class="panel-main">
+    
+        <div class="panel-main__inner panel-inverted">
+        <div class="panel-main__content">
+    
+            <a href="https://dannylane.github.io" title="link to homepage for Danny Lane"><img src="https://avatars3.githubusercontent.com/u/250202?v&#x3D;3" width="80" alt="Danny Lane logo" class="panel-cover__logo logo" /></a>
+            <h1 class="panel-cover__title panel-title"><a href="https://dannylane.github.io" title="link to homepage for Danny Lane">Danny Lane</a></h1>
+            <hr class="panel-cover__divider" />
+            <p class="panel-cover__description">Notes To _Self</p>
+            <hr class="panel-cover__divider panel-cover__divider--secondary" />
+    
+            <div class="navigation-wrapper">
+    
+              <nav class="cover-navigation cover-navigation--primary">
+                <ul class="navigation">
+                  <li class="navigation__item"><a href="https://dannylane.github.io/#blog" title="link to Danny Lane blog" class="blog-button">Blog</a></li>
+                </ul>
+              </nav>
+    
+              
+              
+              <nav class="cover-navigation navigation--social">
+                <ul class="navigation">
+              
+              
+                  <!-- Twitter -->
+                  <li class="navigation__item">
+                    <a href="https://twitter.com/_danny_lane_" title="Twitter account">
+                      <i class='icon icon-social-twitter'></i>
+                      <span class="label">Twitter</span>
+                    </a>
+                  </li>
+              
+              
+                  <!-- Github -->
+                  <li class="navigation__item">
+                    <a href="https://github.com/dannylane" title="Github account">
+                      <i class='icon icon-social-github'></i>
+                      <span class="label">Github</span>
+                    </a>
+                  </li>
+                  </li>
+              
+              
+              
+              
+                  <!-- LinkedIn -->
+                  <li class="navigation__item">
+                    <a href="https://www.linkedin.com/in/dannylane/" title="LinkedIn account">
+                      <i class='icon icon-social-linkedin'></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+              
+              
+                </ul>
+              </nav>
+              
+    
+            </div>
+    
+          </div>
+    
+        </div>
+    
+        <div class="panel-cover--overlay"></div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            
+
+  <article class="post-container post-container--single">
+
+    <header class="post-header">
+      <div class="post-meta">
+        <time datetime="28 Mar 2017" class="post-meta__date date">28 Mar 2017</time> &#8226; <span class="post-meta__tags tags">on <a href="https://dannylane.github.io/tag/AWS/">AWS</a>, <a href="https://dannylane.github.io/tag/Alexa/"> Alexa</a>, <a href="https://dannylane.github.io/tag/Lambda/"> Lambda</a>, <a href="https://dannylane.github.io/tag/Strava/"> Strava</a>, <a href="https://dannylane.github.io/tag/API/"> API</a></span>
+        <span class="post-meta__author author"><img src="https://avatars3.githubusercontent.com/u/250202?v&#x3D;3" alt="profile image for Danny Lane" class="avatar post-meta__avatar" /> by Danny Lane</span>
+      </div>
+      <h1 class="post-title">An Amazon Alexa Skill Using AWS Lambda and the Strava API</h1>
+    </header>
+
+    <section class="post tag-AWS tag-Alexa tag-Lambda tag-Strava tag-API">
+      <div id="preamble">
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/alexa/header.png" alt="header.png">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>TL;DR:</strong> I built an Amazon Alexa voice skill on AWS Lambda using the Strava API (and OAuth)</p>
+</div>
+<div class="paragraph">
+<p>I got an Amazon Echo as a Christmas present (to myself&#8230;&#8203;) and have been really impressed with it. I expected it to be a geek toy that nobody else in the house would use but it gets used a lot by other family members for things like spotify and interactive games (my 4 year old likes to try and beat Alexa at 20 questions!). I think the reason that it has gained such traction in our home is down to the quality of the voice interaction.</p>
+</div>
+<div class="paragraph">
+<p>I wanted to see how difficult it would be it write an app (Skill) for Alexa. I use <a href="http://strava.com">Strava</a> a lot so I decided to see how difficult it would be to get a Skill to consume the API. I&#8217;ve outlined the steps in setting up the Skill and some of the code used to query the API.</p>
+</div>
+<div class="audioblock">
+<div class="title">Before I get started, this is an example of the response from the skill:</div>
+<div class="content">
+<audio src="https://dannylane.github.io/images/alexa/MyActivity.mp3?raw=true" controls>
+Your browser does not support the audio tag.
+</audio>
+</div>
+</div>
+<div class="paragraph">
+<p><em>Disclaimer</em><br>
+There&#8217;s going to be lots of screenshots <em>(boo)</em> of the AWS consoles for the first half of this post. The <code>code</code> <em>(yay)</em> is towards the end.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_aws_lambda">AWS Lambda</h4>
+<div class="paragraph">
+<p>The first step is to create a Lambda function that will host the endpoint for the Skill.</p>
+</div>
+<div class="paragraph">
+<div class="title">There are some templates available but I just started with a blank function.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/1.Lambda.png" alt="1.Lambda.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">The second step allows you to select the triggers that will invoke your serverless function</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/2.Lambda.png" alt="2.Lambda.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">There are a number of predefined options available, choose the "Alexa Skills Kit" option</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/3.Lambda.png" alt="3.Lambda.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">Once a valid trigger is selected you can procede to the next step</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/4.Lambda.png" alt="4.Lambda.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">I chose the Java 8 Runtime but you can chose C#, Node, etc.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/5.Lambda.png" alt="5.Lambda.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">You need to specify what the handler of your skill will be, this is the Java method.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/LambdaConfig.png" alt="LambdaConfig.png"></span></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_skill_configuration">Skill COnfiguration</h4>
+<div class="paragraph">
+<p>Once the skill is set up and up and you have an <a href="http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html">Amazon Resource Name (ARN)</a> to reference your Lambda function, you can set up your Skill to point at it.</p>
+</div>
+<div class="paragraph">
+<p>You create a Skill from the <a href="http://developer.amazon.com">developer.amazon.com</a> portal</p>
+</div>
+<div class="paragraph">
+<div class="title"><strong>Skill Information</strong> allows you to set the name of your skill and the name your users will use to invoke the skill (the invocation Name)</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/SkillInformation.png" alt="SkillInformation.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title"><strong>Interaction Model</strong> is where most of the configuration for how users will speak to your skillis defined.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/InteractionModel.png" alt="InteractionModel.png"></span></p>
+</div>
+<div class="paragraph">
+<p>The interaction model is made up of <strong>Intents</strong>, <strong>Slots</strong> and <strong>Utterances</strong>.<br>
+I defined 2 intents, one to allow a user to query their own activities and the other to query their friends activities.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+  "intents": [
+    {
+      "slots": [
+        {
+          "name": "ActivityType",
+          "type": "LIST_OF_ACTIVITIES"
+        }
+      ],
+      "intent": "WhoWasActive"
+    },
+    {
+      "slots": [
+        {
+          "name": "Direction",
+          "type": "LIST_OF_DIRECTIONS"
+        },
+        {
+          "name": "Date",
+          "type": "AMAZON.DATE"
+        }
+      ],
+      "intent": "MyTraining"
+    }
+  ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Slots are like variables that Amazon extracts from the users request based on how the user invokes the intent.
+There are built in slots like <code>AMAZON.DATE</code> and you can create custom slots too, <code>LIST_OF_ACTIVITIES</code> is a custom slot I defined.</p>
+</div>
+<div class="paragraph">
+<p>For more info see the <a href="https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interaction-model-reference">docs</a></p>
+</div>
+<div class="paragraph">
+<div class="title"><strong>Configuration</strong> The configuration step allows you to set your AWS Lambda ARN or else configure your own enpoint</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/Configuration.png" alt="Configuration.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title"><strong>Account Linking</strong> The account linking is where you can set up an OAuth client token request.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/AccountLinking.png" alt="AccountLinking.png"></span></p>
+</div>
+<div class="paragraph">
+<p>Making the skill work with the Strava OAuth took a while to configure correctly but didn&#8217;t require any code which was nice. Once this config is setup users get prompted to authorise the app from their Strava account
+<span class="image"><img src="https://dannylane.github.io/images/alexa/stravaAuth.png" alt="stravaAuth.png"></span></p>
+</div>
+<div class="paragraph">
+<p>Once the user authorizes the skill, Amazon takes care of requesting and refreshing the auth token. The token is supplied to your request handler with every invocation of the skill and you pass the token through to the API call. Painless.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_aws_eclipse_plugin">AWS Eclipse Plugin</h4>
+<div class="paragraph">
+<p>There is an AWS Plugin for Eclipse available <a href="http://docs.aws.amazon.com/toolkit-for-eclipse/v1/user-guide/setup-install.html">here</a>.</p>
+</div>
+<div class="paragraph">
+<div class="title">The plugin exposes various AWS interfaces through Eclipse.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/1.eclipse.png" alt="1.eclipse.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">From the context menu of a project it is a simple wizard to upload a function to an existing Lambda.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/2.eclipse.png" alt="2.eclipse.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">Once associated with your account you can select which function to upload to</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/3.eclipse.png" alt="3.eclipse.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">Configuration settings can be updated before the deployment</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/4.eclipse.png" alt="4.eclipse.png"></span></p>
+</div>
+<div class="paragraph">
+<div class="title">The plugin then packages up the project and pushes it to the S3 bucket that backs the Lambda function</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/5.eclipse.png" alt="5.eclipse.png"></span></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_code">Code</h4>
+<div class="paragraph">
+<p>I used the <a href="https://github.com/amzn/alexa-skills-kit-java">alexa-skills-kit-java</a> library from Amazon for taking care of a lot of the boilerplate.</p>
+</div>
+<div class="paragraph">
+<p>The entry point to the code is the <code>RequestStreamHandler</code>, this is the handler defined in the Skill config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">public class StriderSpeechletRequestStreamHandler extends SpeechletRequestStreamHandler {
+	private static final Set&lt;String&gt; supportedApplicationIds = new HashSet&lt;String&gt;();
+	static {
+		/*
+		 * This Id can be found on https://developer.amazon.com/edw/home.html#/
+		 * "Edit" the relevant Alexa Skill and put the relevant Application Ids
+		 * in this Set.
+		 */
+		supportedApplicationIds.add("amzn1.ask.skill.&lt;snip&gt;");
+	}
+
+	public StriderSpeechletRequestStreamHandler() {
+		super(new StriderSpeechlet(), supportedApplicationIds);
+	}
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>StriderSpeechlet implements Speechlet</code> class is where you handle events like <code>onLaunch</code>, <code>onIntent</code>, <code>onSessionEnded</code>, etc.</p>
+</div>
+<div class="listingblock">
+<div class="title">This is a pretty quick and dirty onIntent handler, a production ready version could conside investing in Spring DI configured.</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">	@Override
+	public SpeechletResponse onIntent(final IntentRequest request, final Session session) throws SpeechletException {
+		IExecuteQuery query = null;
+		Intent intent = request.getIntent();
+		String intentName = (intent != null) ? intent.getName() : null;
+		String intentDate = getSlotValue(intent, "Date");
+		String intentDirection = getSlotValue(intent, "Direction");
+		String token = session.getUser().getAccessToken();
+
+		try {
+			if ("WhoWasActive".equals(intentName)) {
+				query = new FollowerQuery(token, intentDate);
+			} else if ("MyTraining".equals(intentName)) {
+				query = new SelfQuery(token, intentDirection, intentDate);
+			} else if ("AMAZON.HelpIntent".equals(intentName)) {
+				// TODO help me mario !!!
+			} else {
+				throw new SpeechletException("Invalid Intent");
+			}
+		} catch (Exception e) {
+			throw new SpeechletException(e.getMessage());
+		}
+
+		SsmlOutputSpeech speech = new SsmlOutputSpeech();
+		speech.setSsml(query.Execute().get(0));
+
+		return SpeechletResponse.newTellResponse(speech);
+	}</code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_strava_queries">Strava Queries</h5>
+<div class="paragraph">
+<p>I used the <a href="https://github.com/dustedrob/JStrava">JStrava</a> library for querying the Strava REST API.</p>
+</div>
+<div class="listingblock">
+<div class="title">Querying a users own activities, optional timestap and direction (before date or after date, as supported by the Strava API)</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">	public List&lt;String&gt; Execute() {
+		List&lt;Activity&gt; activities;
+		if ("before".equalsIgnoreCase(_direction)) {
+			activities = strava.getCurrentAthleteActivitiesBeforeDate(_date.getMillis());
+		} else if ("after".equalsIgnoreCase(_direction)) {
+			activities = strava.getCurrentAthleteActivitiesAfterDate(_date.getMillis());
+		} else {
+			activities = strava.getCurrentAthleteActivities();
+		}
+
+		int max = 5;
+		if (activities.size() &lt; 5) {
+			max = activities.size();
+		}
+		return ParseResults(activities.subList(0, max));
+	}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Querying a users friends activities</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">	public List&lt;String&gt; Execute() {
+		List&lt;Activity&gt; activities = strava.getCurrentFriendsActivities();
+		int max = 5;
+		if (activities.size() &lt; 5) {
+			max = activities.size();
+		}
+		return ParseResults(activities.subList(0, max));
+	}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">I had to go back to the API to get the name of friends as the activity only includes the athlete ID</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">	private List&lt;Activity&gt; FillAthleteInfo(List&lt;Activity&gt; activities) {
+		Map&lt;Integer, Athlete&gt; athletes = new HashMap&lt;Integer, Athlete&gt;();
+		int currentId;
+		Athlete athlete;
+
+		for (Activity activity : activities) {
+			currentId = activity.getAthlete().getId();
+			if (!athletes.containsKey(currentId)) {
+				athlete = strava.findAthlete(currentId);
+				athletes.put(currentId, athlete);
+			} else {
+				athlete = athletes.get(currentId);
+			}
+
+			activity.setAthlete(athlete);
+		}
+		return activities;
+	}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Formatting the response for Alexa using SSML</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">	private String responseFormat = "%1$s %2$s &lt;say-as interpret-as=\"unit\"&gt;%3$.1fkm&lt;/say-as&gt; "
+			+ "in &lt;say-as interpret-as=\"unit\"&gt;%4$dhours&lt;/say-as&gt;"
+			+ "&lt;say-as interpret-as=\"unit\"&gt;%5$dminutes&lt;/say-as&gt;";
+
+    private String FormatActivity(Activity activity) {
+		double km = activity.getDistance() / 1000;
+		int hours = activity.getElapsed_time() / 3600;
+		int minutes = (activity.getElapsed_time() % 3600) / 60;
+
+		return String.format(responseFormat, activity.getAthlete().toString(), activity.getType(), km, hours, minutes);
+	}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><em>Yes, I was being lazy and inserted the type into the response directly, so run is spoken instead of the past tense.</em></p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_speech_synthesis_markup_language">Speech Synthesis Markup Language</h5>
+<div class="paragraph">
+<p>Alexa alows you to tailor how the response is delivered (spoken) to the user using <a href="https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/speech-synthesis-markup-language-ssml-reference">SSML</a></p>
+</div>
+<div class="listingblock">
+<div class="title">A response for one of my activities looks like this</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">    "outputSpeech": {
+      "type": "SSML",
+      "ssml": "Danny Lane Run &lt;say-as interpret-as=\"unit\"&gt;16.2km&lt;/say-as&gt; in &lt;say-as interpret-as=\"unit\"&gt;1hours&lt;/say-as&gt;&lt;say-as interpret-as=\"unit\"&gt;8minutes&lt;/say-as&gt;"
+    },</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_result">Result</h5>
+<div class="paragraph">
+<p>There code above is all very agricultural but it&#8217;s enough to get a response from Alexa. To test the Skill you can input an utterance from the test page and see the request that goes to your app (see the session token and how the slots/intent are broken up) and you can see the response also.</p>
+</div>
+<div class="paragraph">
+<div class="title">To test the skill you can use the Service Simulator from the <strong>Test</strong> tab.</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/ServiceSimulator.png" alt="ServiceSimulator.png"></span></p>
+</div>
+<div class="paragraph">
+<p>The request/response for the request to 'ask Strider <strong>Tell me my activities yesterday</strong>' is below:</p>
+</div>
+<div class="listingblock">
+<div class="title"><em>Request</em></div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+  "session": {
+    "sessionId": "SessionId.&lt;snip&gt;",
+    "application": {
+      "applicationId": "amzn1.ask.skill.&lt;snip&gt;"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.&lt;snip&gt;",
+      "accessToken": "&lt;snip&gt;"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.&lt;snip&gt;",
+    "locale": "en-GB",
+    "timestamp": "2017-03-27T20:32:51Z",
+    "intent": {
+      "name": "MyTraining",
+      "slots": {
+        "Direction": {
+          "name": "Direction",
+          "value": "before"
+        },
+        "Date": {
+          "name": "Date",
+          "value": "2017-03-26"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title"><em>Response</em></div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+  "version": "1.0",
+  "response": {
+    "outputSpeech": {
+      "type": "SSML",
+      "ssml": "Danny Lane Run &lt;say-as interpret-as=\"unit\"&gt;16.2km&lt;/say-as&gt; in &lt;say-as interpret-as=\"unit\"&gt;1hours&lt;/say-as&gt;&lt;say-as interpret-as=\"unit\"&gt;8minutes&lt;/say-as&gt;"
+    },
+    "shouldEndSession": true
+  },
+  "sessionAttributes": {}
+}</code></pre>
+</div>
+</div>
+<div class="audioblock">
+<div class="title">The audio file that Alexa generates for the SSML above is the one I linked to at the top of the post:</div>
+<div class="content">
+<audio src="https://dannylane.github.io/images/alexa/MyActivity.mp3?raw=true" controls>
+Your browser does not support the audio tag.
+</audio>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Friend Query</strong></p>
+</div>
+<div class="listingblock">
+<div class="title">A request for the utterance <strong>Who was active</strong> results in a different intent being delivered to the endpoint:</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">    "intent": {
+      "name": "WhoWasActive",
+      "slots": {
+        "ActivityType": {
+          "name": "ActivityType"
+        }
+      }
+    }</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">And the response is for one of the people I follow</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">  "response": {
+    "outputSpeech": {
+      "type": "SSML",
+      "ssml": "Brian McCarthy Ride &lt;say-as interpret-as=\"unit\"&gt;31.0km&lt;/say-as&gt; in &lt;say-as interpret-as=\"unit\"&gt;1hours&lt;/say-as&gt;&lt;say-as interpret-as=\"unit\"&gt;0minutes&lt;/say-as&gt;"
+    },
+    "shouldEndSession": true
+  }</code></pre>
+</div>
+</div>
+<div class="audioblock">
+<div class="title">The SSML for the response above sounds like this:</div>
+<div class="content">
+<audio src="https://dannylane.github.io/images/alexa/FriendActivity.mp3?raw=true" controls>
+Your browser does not support the audio tag.
+</audio>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_logging">Logging</h5>
+<div class="paragraph">
+<div class="title">Lambda <a href="http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html">supports</a> Log4j and <code>LambdaLogger</code>, the logging output is available in AWS CloudWatch</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/CloudWatchLogs.png" alt="CloudWatchLogs.png"></span></p>
+</div>
+</div>
+</div>
+    </section>
+
+  </article>
+
+  
+  <section class="post-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'dannylane-github-io'; // required: replace example with your forum shortname
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  </section>
+  
+
+
+
+            <footer class="footer">
+                <span class="footer__copyright">&copy; 2017. All rights reserved.</span>
+                <span class="footer__copyright"><a href="http://uno.daleanthony.com" title="link to page for Uno Ghost theme">Uno theme</a> by <a href="http://daleanthony.com" title="link to website for Dale-Anthony">Dale-Anthony</a></span>
+                <span class="footer__copyright">Proudly published with <a href="http://hubpress.io" title="link to Hubpress website">Hubpress</a></span>
+            </footer>
+        </div>
+    </div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
+      <script type="text/javascript">
+        jQuery( document ).ready(function() {
+          // change date with ago
+          jQuery('ago.ago').each(function(){
+            var element = jQuery(this).parent();
+            element.html( moment(element.text()).fromNow());
+          });
+        });
+
+        hljs.initHighlightingOnLoad();
+      </script>
+
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1490658210780"></script>
+    
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-93232110-1', 'auto');
+    ga('send', 'pageview');
+
+    </script>
+
+</body>
+</html>
