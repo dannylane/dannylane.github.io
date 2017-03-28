@@ -216,6 +216,12 @@ image:alexa/postman.png[]
 }
 ----
 
+These are the endpoints I was most interested in:
+`https://www.strava.com/api/v3/athlete/activities` - Logged in users activities
+`https://www.strava.com/api/v3/activities/following` - Friends activities
+`https://www.strava.com/api/v3/athletes/:id` - Used for backfilling the athlete name for friends activities
+
+
 I used the https://github.com/dustedrob/JStrava[JStrava] library for querying the Strava REST API. 
 
 .Querying a users own activities, optional timestap and direction (before date or after date, as supported by the Strava API)
