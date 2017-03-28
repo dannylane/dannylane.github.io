@@ -180,6 +180,42 @@ The `StriderSpeechlet implements Speechlet` class is where you handle events lik
 ----
 
 ===== Strava Queries
+Strava exposes a RESTful API where a user, once authenticated, can query info about their activities, friends activities, segments, etc. The docs for the API are https://strava.github.io/api/[here]. 
+
+.Using Postman to test the API endpoint
+image:alexa/postman.png[]
+
+.A stripped down version of the API response
+[source, json]
+----
+{
+  "id": 321934,
+  "athlete": {
+    "id": 227615,
+    "resource_state": 1
+  },
+  "name": "Evening Ride",
+  "description": "the best ride ever",
+  "distance": 4475.4,
+  "moving_time": 1303,
+  "elapsed_time": 1333,
+  "total_elevation_gain": 154.5,
+  "elev_high": 331.4,
+  "elev_low": 276.1,
+  "type": "Run",
+  "start_date": "2012-12-13T03:43:19Z",
+  "start_date_local": "2012-12-12T19:43:19Z",
+  "start_latlng": [ 37.8, -122.27],
+  "end_latlng": [37.8, -122.27],
+  "photos": {},
+  "map": {},
+  "average_speed": 3.4,
+  "max_speed": 4.514,
+  "segment_efforts": [],
+  "laps": []
+}
+----
+
 I used the https://github.com/dustedrob/JStrava[JStrava] library for querying the Strava REST API. 
 
 .Querying a users own activities, optional timestap and direction (before date or after date, as supported by the Strava API)
