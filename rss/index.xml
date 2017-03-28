@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 28 Mar 2017 07:13:00 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 28 Mar 2017 07:18:47 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
@@ -263,6 +263,12 @@ For example, if a user spoke <em>Who Ran</em> or <em>Who Cycyled</em> they would
   "laps": []
 }</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>These are the endpoints I was most interested in:
+<code><a href="https://www.strava.com/api/v3/athlete/activities" class="bare">https://www.strava.com/api/v3/athlete/activities</a></code> - Logged in users activities
+<code><a href="https://www.strava.com/api/v3/activities/following" class="bare">https://www.strava.com/api/v3/activities/following</a></code> - Friends activities
+<code><a href="https://www.strava.com/api/v3/athletes/:id" class="bare">https://www.strava.com/api/v3/athletes/:id</a></code> - Used for backfilling the athlete name for friends activities</p>
 </div>
 <div class="paragraph">
 <p>I used the <a href="https://github.com/dustedrob/JStrava">JStrava</a> library for querying the Strava REST API.</p>
