@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 27 Mar 2017 23:58:57 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 28 Mar 2017 07:13:00 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
@@ -226,6 +226,44 @@ For example, if a user spoke <em>Who Ran</em> or <em>Who Cycyled</em> they would
 </div>
 <div class="sect4">
 <h5 id="_strava_queries">Strava Queries</h5>
+<div class="paragraph">
+<p>Strava exposes a RESTful API where a user, once authenticated, can query info about their activities, friends activities, segments, etc. The docs for the API are <a href="https://strava.github.io/api/">here</a>.</p>
+</div>
+<div class="paragraph">
+<div class="title">Using Postman to test the API endpoint</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/alexa/postman.png" alt="postman.png"></span></p>
+</div>
+<div class="listingblock">
+<div class="title">A stripped down version of the API response</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+  "id": 321934,
+  "athlete": {
+    "id": 227615,
+    "resource_state": 1
+  },
+  "name": "Evening Ride",
+  "description": "the best ride ever",
+  "distance": 4475.4,
+  "moving_time": 1303,
+  "elapsed_time": 1333,
+  "total_elevation_gain": 154.5,
+  "elev_high": 331.4,
+  "elev_low": 276.1,
+  "type": "Run",
+  "start_date": "2012-12-13T03:43:19Z",
+  "start_date_local": "2012-12-12T19:43:19Z",
+  "start_latlng": [ 37.8, -122.27],
+  "end_latlng": [37.8, -122.27],
+  "photos": {},
+  "map": {},
+  "average_speed": 3.4,
+  "max_speed": 4.514,
+  "segment_efforts": [],
+  "laps": []
+}</code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p>I used the <a href="https://github.com/dustedrob/JStrava">JStrava</a> library for querying the Strava REST API.</p>
 </div>
