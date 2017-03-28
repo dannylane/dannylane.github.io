@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1490685180287" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1490685527066" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/03/28/An-Amazon-Alexa-Skill-Using-AWS-Lambda-and-the-Strava-API.html" />
     <meta name="referrer" content="origin" />
@@ -413,6 +413,12 @@ For example, if a user spoke <em>Who Ran</em> or <em>Who Cycyled</em> they would
 </div>
 </div>
 <div class="paragraph">
+<p>These are the endpoints I was most interested in:
+<code><a href="https://www.strava.com/api/v3/athlete/activities" class="bare">https://www.strava.com/api/v3/athlete/activities</a></code> - Logged in users activities
+<code><a href="https://www.strava.com/api/v3/activities/following" class="bare">https://www.strava.com/api/v3/activities/following</a></code> - Friends activities
+<code><a href="https://www.strava.com/api/v3/athletes/:id" class="bare">https://www.strava.com/api/v3/athletes/:id</a></code> - Used for backfilling the athlete name for friends activities</p>
+</div>
+<div class="paragraph">
 <p>I used the <a href="https://github.com/dustedrob/JStrava">JStrava</a> library for querying the Strava REST API.</p>
 </div>
 <div class="listingblock">
@@ -680,7 +686,7 @@ Your browser does not support the audio tag.
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1490685180287"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1490685527066"></script>
     
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
