@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 04 Apr 2017 07:46:30 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013]]></title><description><![CDATA[<div class="paragraph">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 04 Apr 2017 07:54:31 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013]]></title><description><![CDATA[<div class="paragraph">
 <p><strong>TL;DR;</strong> Updating a TFS Build process to reorder test execution before automated release</p>
 </div>
 <div class="paragraph">
@@ -9,7 +9,7 @@
 Once a release was deployed to the test environment the test team had the option of pushing the same build to higher environments SIT → UAT → PROD.</p>
 </div>
 <div class="paragraph">
-<p>When I was going through the process with the test team (I felt it was important that the test team were empowered to release to the environments they worked in) about how to push the builds etc, one of them asked about builds that had failing unit tests, how would they know to avoid those builds.
+<p>When I was going through the process with the test team about how to push the builds etc, one of them asked about builds that had failing unit tests, how would they know to avoid those builds.
 I assured them that broken tests will fail the build so it won&#8217;t get released. I was wrong.</p>
 </div>
 <div class="imageblock">
