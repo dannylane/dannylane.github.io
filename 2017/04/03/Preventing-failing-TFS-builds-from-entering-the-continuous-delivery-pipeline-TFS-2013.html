@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013 - Danny Lane</title>
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <meta name="description" content="">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013">
+    <meta name="twitter:description" content="">
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013">
+    <meta property="og:description" content="">
+
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
+
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1491291990665" />
+
+    <link rel="canonical" href="https://dannylane.github.io/2017/04/03/Preventing-failing-TFS-builds-from-entering-the-continuous-delivery-pipeline-TFS-2013.html" />
+    <meta name="referrer" content="origin" />
+    
+    <meta property="og:site_name" content="Danny Lane" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013" />
+    <meta property="og:description" content="TL;DR; Updating a TFS Build process to reorder test execution before automated release I setup a continuous delivery pipeline for a client project I was working on recentland I  wanted to touch on a quirk I noticed after it was up in running. At a high level the pipeline" />
+    <meta property="og:url" content="https://dannylane.github.io/2017/04/03/Preventing-failing-TFS-builds-from-entering-the-continuous-delivery-pipeline-TFS-2013.html" />
+    <meta property="article:tag" content="TFS" />
+    <meta property="article:tag" content=" UnitTest" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013" />
+    <meta name="twitter:description" content="TL;DR; Updating a TFS Build process to reorder test execution before automated release I setup a continuous delivery pipeline for a client project I was working on recentland I  wanted to touch on a quirk I noticed after it was up in running. At a high level the pipeline" />
+    <meta name="twitter:url" content="https://dannylane.github.io/2017/04/03/Preventing-failing-TFS-builds-from-entering-the-continuous-delivery-pipeline-TFS-2013.html" />
+    
+    <script type="application/ld+json">
+null
+    </script>
+
+    <meta name="generator" content="HubPress" />
+    <link rel="alternate" type="application/rss+xml" title="Danny Lane" href="https://dannylane.github.io/rss/" />
+
+</head>
+<body class="post-template tag-TFS tag-Unit-Test no-js">
+
+    <span class="mobile btn-mobile-menu">
+        <i class="icon icon-list btn-mobile-menu__icon"></i>
+        <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+
+    <header class="panel-cover panel-cover--collapsed " style="background-image: url(https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png)">
+      <div class="panel-main">
+    
+        <div class="panel-main__inner panel-inverted">
+        <div class="panel-main__content">
+    
+            <a href="https://dannylane.github.io" title="link to homepage for Danny Lane"><img src="https://avatars3.githubusercontent.com/u/250202?v&#x3D;3" width="80" alt="Danny Lane logo" class="panel-cover__logo logo" /></a>
+            <h1 class="panel-cover__title panel-title"><a href="https://dannylane.github.io" title="link to homepage for Danny Lane">Danny Lane</a></h1>
+            <hr class="panel-cover__divider" />
+            <p class="panel-cover__description">Notes To _Self</p>
+            <hr class="panel-cover__divider panel-cover__divider--secondary" />
+    
+            <div class="navigation-wrapper">
+    
+              <nav class="cover-navigation cover-navigation--primary">
+                <ul class="navigation">
+                  <li class="navigation__item"><a href="https://dannylane.github.io/#blog" title="link to Danny Lane blog" class="blog-button">Blog</a></li>
+                </ul>
+              </nav>
+    
+              
+              
+              <nav class="cover-navigation navigation--social">
+                <ul class="navigation">
+              
+              
+                  <!-- Twitter -->
+                  <li class="navigation__item">
+                    <a href="https://twitter.com/_danny_lane_" title="Twitter account">
+                      <i class='icon icon-social-twitter'></i>
+                      <span class="label">Twitter</span>
+                    </a>
+                  </li>
+              
+              
+                  <!-- Github -->
+                  <li class="navigation__item">
+                    <a href="https://github.com/dannylane" title="Github account">
+                      <i class='icon icon-social-github'></i>
+                      <span class="label">Github</span>
+                    </a>
+                  </li>
+                  </li>
+              
+              
+              
+              
+                  <!-- LinkedIn -->
+                  <li class="navigation__item">
+                    <a href="https://www.linkedin.com/in/dannylane/" title="LinkedIn account">
+                      <i class='icon icon-social-linkedin'></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+              
+              
+                </ul>
+              </nav>
+              
+    
+            </div>
+    
+          </div>
+    
+        </div>
+    
+        <div class="panel-cover--overlay"></div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner">
+            
+
+  <article class="post-container post-container--single">
+
+    <header class="post-header">
+      <div class="post-meta">
+        <time datetime="03 Apr 2017" class="post-meta__date date">03 Apr 2017</time> &#8226; <span class="post-meta__tags tags">on <a href="https://dannylane.github.io/tag/TFS/">TFS</a>, <a href="https://dannylane.github.io/tag/Unit-Test/"> UnitTest</a></span>
+        <span class="post-meta__author author"><img src="https://avatars3.githubusercontent.com/u/250202?v&#x3D;3" alt="profile image for Danny Lane" class="avatar post-meta__avatar" /> by Danny Lane</span>
+      </div>
+      <h1 class="post-title">Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013</h1>
+    </header>
+
+    <section class="post tag-TFS tag-Unit-Test">
+      <div class="paragraph">
+<p><strong>TL;DR;</strong> Updating a TFS Build process to reorder test execution before automated release</p>
+</div>
+<div class="paragraph">
+<p>I setup a continuous delivery pipeline for a client project I was working on recentland I  wanted to touch on a quirk I noticed after it was up in running.</p>
+</div>
+<div class="paragraph">
+<p>At a high level the pipeline was developer check in → TFS 2013 Build → Run unit &amp; integration tests → Deploy to Test environment.
+Once a release was deployed to the test environment the test team had the option of pushing the same build to higher environments SIT → UAT → PROD.</p>
+</div>
+<div class="paragraph">
+<p>When I was going through the process with the test team (I felt it was important that the test team were empowered to release to the environments they worked in) about how to push the builds etc, one of them asked about builds that had failing unit tests, how would they know to avoid those builds.
+I assured them that broken tests will fail the build so it won&#8217;t get released. I was wrong.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/1.png" alt="1.png">
+</div>
+<div class="title">Figure 1. I had expected this setting in the build definition to prevent builds with failing tests from being deployed.</div>
+</div>
+<div class="paragraph">
+<p>After a few days I noticed a build in the test environment that had failed because of broken tests but somehow had still escaped into the wild.</p>
+</div>
+<div class="paragraph">
+<p>After a little research I tracked the behavior down to the build process template.
+One of the steps required to get you
+r TFS 2013 builds integrated with MS Release Management (RM) is to configure the builds to use the release build template (ReleaseTfvcTemplate.12.xaml).
+Using this process template adds the following config options to your build:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/2.png" alt="2.png">
+</div>
+</div>
+<div class="paragraph">
+<p>Setting the 'Release Build' flag indicates that you want the build to be released by RM.</p>
+</div>
+<div class="paragraph">
+<p>It turns out that the sequence of events in the xaml file wasn&#8217;t what I had expected. In the screenshot below you can see that the "Process the release" step occurs before the "Run VS Test Runner" step.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/3.png" alt="3.png">
+</div>
+</div>
+<div class="paragraph">
+<p>I found some <a href="https://social.msdn.microsoft.com/Forums/vstudio/en-US/dcce6ce7-830c-4bc2-805b-1cf331e04253/release-management-releasing-failed-builds-also-triggering-release-from-failed-builds?forum=tfsbuild">others</a> had the same issue with TFS 2012 and the suggestions pointed me in the right direction but didn&#8217;t work on TFS 2013</p>
+</div>
+<div class="paragraph">
+<p>The obvious first step is to change the order:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/4.png" alt="4.png">
+</div>
+</div>
+<div class="paragraph">
+<p>But changing the order on it&#8217;s own is&#8217;t enough.
+I needed to update the "Process the release" step to only run if the build has not failed yet.</p>
+</div>
+<div class="paragraph">
+<p>The BuildDetail properties tat were available in TFS 2012 need to be <a href="https://social.msdn.microsoft.com/Forums/vstudio/en-US/49f11ed9-9fa8-4c20-952a-d39ee7e71051/can-no-longer-user-builddetaildroplocation-for-copydirectory-with-tfs-2013-using-build-process?forum=tfsbuild">imported</a> when using TFS 2013</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/5.png" alt="5.png">
+</div>
+</div>
+<div class="paragraph">
+<p>With the BuildDetail variable available I can wrap the release step in a condition to that checks if the build has failed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/6.png" alt="6.png">
+</div>
+</div>
+<div class="paragraph">
+<p>Once you have updated the xaml, save it to your source control so it can be set as the new template for the build.</p>
+</div>
+    </section>
+
+  </article>
+
+  
+  <section class="post-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'dannylane-github-io'; // required: replace example with your forum shortname
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  </section>
+  
+
+
+
+            <footer class="footer">
+                <span class="footer__copyright">&copy; 2017. All rights reserved.</span>
+                <span class="footer__copyright"><a href="http://uno.daleanthony.com" title="link to page for Uno Ghost theme">Uno theme</a> by <a href="http://daleanthony.com" title="link to website for Dale-Anthony">Dale-Anthony</a></span>
+                <span class="footer__copyright">Proudly published with <a href="http://hubpress.io" title="link to Hubpress website">Hubpress</a></span>
+            </footer>
+        </div>
+    </div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js?v="></script> <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js?v="></script> 
+      <script type="text/javascript">
+        jQuery( document ).ready(function() {
+          // change date with ago
+          jQuery('ago.ago').each(function(){
+            var element = jQuery(this).parent();
+            element.html( moment(element.text()).fromNow());
+          });
+        });
+
+        hljs.initHighlightingOnLoad();
+      </script>
+
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1491291990665"></script>
+    
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-93232110-1', 'auto');
+    ga('send', 'pageview');
+
+    </script>
+
+</body>
+</html>
