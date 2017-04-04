@@ -1,4 +1,82 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 28 Mar 2017 07:31:58 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 04 Apr 2017 07:46:30 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013]]></title><description><![CDATA[<div class="paragraph">
+<p><strong>TL;DR;</strong> Updating a TFS Build process to reorder test execution before automated release</p>
+</div>
+<div class="paragraph">
+<p>I setup a continuous delivery pipeline for a client project I was working on recentland I  wanted to touch on a quirk I noticed after it was up in running.</p>
+</div>
+<div class="paragraph">
+<p>At a high level the pipeline was developer check in → TFS 2013 Build → Run unit &amp; integration tests → Deploy to Test environment.
+Once a release was deployed to the test environment the test team had the option of pushing the same build to higher environments SIT → UAT → PROD.</p>
+</div>
+<div class="paragraph">
+<p>When I was going through the process with the test team (I felt it was important that the test team were empowered to release to the environments they worked in) about how to push the builds etc, one of them asked about builds that had failing unit tests, how would they know to avoid those builds.
+I assured them that broken tests will fail the build so it won&#8217;t get released. I was wrong.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/1.png" alt="1.png">
+</div>
+<div class="title">Figure 1. I had expected this setting in the build definition to prevent builds with failing tests from being deployed.</div>
+</div>
+<div class="paragraph">
+<p>After a few days I noticed a build in the test environment that had failed because of broken tests but somehow had still escaped into the wild.</p>
+</div>
+<div class="paragraph">
+<p>After a little research I tracked the behavior down to the build process template.
+One of the steps required to get you
+r TFS 2013 builds integrated with MS Release Management (RM) is to configure the builds to use the release build template (ReleaseTfvcTemplate.12.xaml).
+Using this process template adds the following config options to your build:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/2.png" alt="2.png">
+</div>
+</div>
+<div class="paragraph">
+<p>Setting the 'Release Build' flag indicates that you want the build to be released by RM.</p>
+</div>
+<div class="paragraph">
+<p>It turns out that the sequence of events in the xaml file wasn&#8217;t what I had expected. In the screenshot below you can see that the "Process the release" step occurs before the "Run VS Test Runner" step.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/3.png" alt="3.png">
+</div>
+</div>
+<div class="paragraph">
+<p>I found some <a href="https://social.msdn.microsoft.com/Forums/vstudio/en-US/dcce6ce7-830c-4bc2-805b-1cf331e04253/release-management-releasing-failed-builds-also-triggering-release-from-failed-builds?forum=tfsbuild">others</a> had the same issue with TFS 2012 and the suggestions pointed me in the right direction but didn&#8217;t work on TFS 2013</p>
+</div>
+<div class="paragraph">
+<p>The obvious first step is to change the order:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/4.png" alt="4.png">
+</div>
+</div>
+<div class="paragraph">
+<p>But changing the order on it&#8217;s own is&#8217;t enough.
+I needed to update the "Process the release" step to only run if the build has not failed yet.</p>
+</div>
+<div class="paragraph">
+<p>The BuildDetail properties tat were available in TFS 2012 need to be <a href="https://social.msdn.microsoft.com/Forums/vstudio/en-US/49f11ed9-9fa8-4c20-952a-d39ee7e71051/can-no-longer-user-builddetaildroplocation-for-copydirectory-with-tfs-2013-using-build-process?forum=tfsbuild">imported</a> when using TFS 2013</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/5.png" alt="5.png">
+</div>
+</div>
+<div class="paragraph">
+<p>With the BuildDetail variable available I can wrap the release step in a condition to that checks if the build has failed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://dannylane.github.io/images/failbuild/6.png" alt="6.png">
+</div>
+</div>
+<div class="paragraph">
+<p>Once you have updated the xaml, save it to your source control so it can be set as the new template for the build.</p>
+</div>]]></description><link>https://dannylane.github.io/2017/04/03/Preventing-failing-TFS-builds-from-entering-the-continuous-delivery-pipeline-TFS-2013.html</link><guid isPermaLink="true">https://dannylane.github.io/2017/04/03/Preventing-failing-TFS-builds-from-entering-the-continuous-delivery-pipeline-TFS-2013.html</guid><category><![CDATA[TFS]]></category><category><![CDATA[ UnitTest]]></category><dc:creator><![CDATA[Danny Lane]]></dc:creator><pubDate>Mon, 03 Apr 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[An Amazon Alexa Skill Using AWS Lambda and the Strava API]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
