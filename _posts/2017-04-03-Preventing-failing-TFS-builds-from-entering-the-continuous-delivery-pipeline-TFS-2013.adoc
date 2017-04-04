@@ -1,47 +1,51 @@
-= preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013
-I setup a continuous delivery pipeline for a client project I was working on recently, I'll probably talk more about how I set it up in another post but for now I just wanted to touch on a quirk I noticed after it was up in running.
-At a high level the pipeline was developer checkin -> TFS 2013 Build -> Run unit & integration tests -> Deploy to Test environment.
-Once a release was deployed to Test the test team had the option of pushing the same build to higher environments SIT->UAT->PROD.
+= Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013
+:published_at: 2017-04-03
+:hp-tags: TFS, UnitTest
+
+*TL;DR;* Updating a TFS Build process to reorder test execution before automated release
+
+I setup a continuous delivery pipeline for a client project I was working on recentland I  wanted to touch on a quirk I noticed after it was up in running.
+
+At a high level the pipeline was developer check in → TFS 2013 Build → Run unit & integration tests → Deploy to Test environment.
+Once a release was deployed to the test environment the test team had the option of pushing the same build to higher environments SIT → UAT → PROD.
 
 When I was going through the process with the test team (I felt it was important that the test team were empowered to release to the environments they worked in) about how to push the builds etc, one of them asked about builds that had failing unit tests, how would they know to avoid those builds.
 I assured them that broken tests will fail the build so it won't get released. I was wrong.
-pasted1
 
+.I had expected this setting in the build definition to prevent builds with failing tests from being deployed.
+image::failbuild/1.png[]
 
 After a few days I noticed a build in the test environment that had failed because of broken tests but somehow had still escaped into the wild.
-http://i.giphy.com/GAXMzzd2XElnG.gif
 
 After a little research I tracked the behavior down to the build process template.
-One of the steps required to get your TFS 2013 builds integrated with MS Release Management (RM) is to configure the builds to use the release build template (ReleaseTfvcTemplate.12.xaml).
+One of the steps required to get you
+r TFS 2013 builds integrated with MS Release Management (RM) is to configure the builds to use the release build template (ReleaseTfvcTemplate.12.xaml).
 Using this process template adds the following config options to your build:
 
-opts.png
-=preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013
+image::failbuild/2.png[]
 
 Setting the 'Release Build' flag indicates that you want the build to be released by RM.
 
 It turns out that the sequence of events in the xaml file wasn't what I had expected. In the screenshot below you can see that the "Process the release" step occurs before the "Run VS Test Runner" step.
 
-pasted2
+image::failbuild/3.png[]
 
-
-I found some others had the same issue with TFS 2012 and the suggestions pointed me in the right direction but didn't work on TFS 2013
-https://social.msdn.microsoft.com/Forums/vstudio/en-US/dcce6ce7-830c-4bc2-805b-1cf331e04253/release-management-releasing-failed-builds-also-triggering-release-from-failed-builds?forum=tfsbuild
+I found some https://social.msdn.microsoft.com/Forums/vstudio/en-US/dcce6ce7-830c-4bc2-805b-1cf331e04253/release-management-releasing-failed-builds-also-triggering-release-from-failed-builds?forum=tfsbuild[others] had the same issue with TFS 2012 and the suggestions pointed me in the right direction but didn't work on TFS 2013
 
 The obvious first step is to change the order:
-2017-02-22 16_11_05-DDS - Microsoft Visual Studio (Administrator).png
+
+image::failbuild/4.png[]
 
 But changing the order on it's own is't enough.
 I needed to update the "Process the release" step to only run if the build has not failed yet.
-The BuildDetail properties tat were available in TFS 2012 need to be imported when using TFS 2013
-https://social.msdn.microsoft.com/Forums/vstudio/en-US/49f11ed9-9fa8-4c20-952a-d39ee7e71051/can-no-longer-user-builddetaildroplocation-for-copydirectory-with-tfs-2013-using-build-process?forum=tfsbuild
-pasted3
 
+The BuildDetail properties tat were available in TFS 2012 need to be https://social.msdn.microsoft.com/Forums/vstudio/en-US/49f11ed9-9fa8-4c20-952a-d39ee7e71051/can-no-longer-user-builddetaildroplocation-for-copydirectory-with-tfs-2013-using-build-process?forum=tfsbuild[imported] when using TFS 2013
+
+image::failbuild/5.png[]
 
 With the BuildDetail variable available I can wrap the release step in a condition to that checks if the build has failed.
 
-step.png
-
+image::failbuild/6.png[]
 
 Once you have updated the xaml, save it to your source control so it can be set as the new template for the build.
 
