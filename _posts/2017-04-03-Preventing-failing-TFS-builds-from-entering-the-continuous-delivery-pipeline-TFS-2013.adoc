@@ -4,7 +4,7 @@
 
 *TL;DR;* Updating a TFS Build process to reorder test execution before automated release
 
-I setup a continuous delivery pipeline for a client project I was working on recentland I  wanted to touch on a quirk I noticed after it was up in running.
+I setup a continuous delivery pipeline for a client project I was working on recently and I  wanted to touch on a quirk I noticed after it was up in running.
 
 At a high level the pipeline was developer check in → TFS 2013 Build → Run unit & integration tests → Deploy to Test environment.
 Once a release was deployed to the test environment the test team had the option of pushing the same build to higher environments SIT → UAT → PROD.
