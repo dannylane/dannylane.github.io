@@ -9,7 +9,7 @@ I setup a continuous delivery pipeline for a client project I was working on rec
 At a high level the pipeline was developer check in → TFS 2013 Build → Run unit & integration tests → Deploy to Test environment.
 Once a release was deployed to the test environment the test team had the option of pushing the same build to higher environments SIT → UAT → PROD.
 
-When I was going through the process with the test team (I felt it was important that the test team were empowered to release to the environments they worked in) about how to push the builds etc, one of them asked about builds that had failing unit tests, how would they know to avoid those builds.
+When I was going through the process with the test team about how to push the builds etc, one of them asked about builds that had failing unit tests, how would they know to avoid those builds.
 I assured them that broken tests will fail the build so it won't get released. I was wrong.
 
 .I had expected this setting in the build definition to prevent builds with failing tests from being deployed.
