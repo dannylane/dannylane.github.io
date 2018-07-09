@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 09 Jul 2018 21:18:51 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Azure Functions with ServiceBus and Blob Storage]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 09 Jul 2018 21:24:22 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Azure Functions with ServiceBus and Blob Storage]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Serverless technologies are an area of cloud computing that I find very interesting, particularly the Function As A Service paradigm.</p>
@@ -86,9 +86,10 @@ public static IActionResult Run(
 <p><strong>Input</strong></p>
 </div>
 <div class="paragraph">
-<p>The HTTPTrigger attribute on the req param tells Azure that this function should be exposed as a HTTP endpoint, the HttpRequest is available in the req object, allowing you full access to headers, form data, etc.
-r
-<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/invoke_http_function.png" alt="invoke http function.png"></span></p>
+<p>The HTTPTrigger attribute on the req param tells Azure that this function should be exposed as a HTTP endpoint, the HttpRequest is available in the req object, allowing you full access to headers, form data, etc.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/invoke_http_function.png" alt="invoke http function.png"></span></p>
 </div>
 <div class="paragraph">
 <p><strong>Output</strong></p>
@@ -205,8 +206,10 @@ return;</code></pre>
 </div>
 <div class="paragraph">
 <p>The runtime gives some good logs around which Functions have been detected:
-<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/detecting_functions.png" alt="detecting functions.png"></span>
-URLs HTTP triggered Functions can be invoked from:
+<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/detecting_functions.png" alt="detecting functions.png"></span></p>
+</div>
+<div class="paragraph">
+<p>URLs HTTP triggered Functions can be invoked from:
 <span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/http_trigger_functions.png" alt="http trigger functions.png"></span></p>
 </div>
 <div class="paragraph">
