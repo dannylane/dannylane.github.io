@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 09 Jul 2018 21:11:59 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Azure Functions with ServiceBus and Blob Storage]]></title><description><![CDATA[<div id="preamble">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 09 Jul 2018 21:18:51 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Azure Functions with ServiceBus and Blob Storage]]></title><description><![CDATA[<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Serverless technologies are an area of cloud computing that I find very interesting, particularly the Function As A Service paradigm.</p>
@@ -29,8 +29,8 @@
 </div>
 </div>
 </div>
-<div class="sect5">
-<h6 id="_bindings">Bindings</h6>
+<div class="sect3">
+<h4 id="_bindings">Bindings</h4>
 <div class="paragraph">
 <p>Defore I get into the code I should call out the <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings">bindings and triggers</a> that Azure provides for interacting with Functions. There is a <a href="https://github.com/Azure/azure-functions-host/wiki/function.json">function.json</a> file that defines the configuration for a Function. The bindings sesiont of this json file tells Azure how the Function should be triggered and how it&#8217;s output should be treated. Theres a simple example here:</p>
 </div>
@@ -63,8 +63,8 @@
 <p>Disclaimer, all these examples are trivial and contrived, none even resemble a prototype.</p>
 </div>
 </div>
-<div class="sect5">
-<h6 id="_trigger_movie_process">Trigger Movie Process</h6>
+<div class="sect3">
+<h4 id="_trigger_movie_process">Trigger Movie Process</h4>
 <div class="paragraph">
 <p>.
 <span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/seq1.png" alt="seq1.png"></span></p>
