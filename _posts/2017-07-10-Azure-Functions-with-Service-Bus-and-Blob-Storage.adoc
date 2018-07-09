@@ -20,7 +20,7 @@ There is a 5th function that is exposed as a simple search API and is integrated
 
 In this first article I'm going to go through the first 2 steps, triggering the data flow and getting the CSV into Blob Storage. 
 
-====== Bindings 
+==== Bindings 
 
 Defore I get into the code I should call out the https://docs.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings[bindings and triggers] that Azure provides for interacting with Functions. There is a https://github.com/Azure/azure-functions-host/wiki/function.json[function.json] file that defines the configuration for a Function. The bindings sesiont of this json file tells Azure how the Function should be triggered and how it's output should be treated. Theres a simple example here: 
 
@@ -48,7 +48,7 @@ In my examples below I'm mostly working with HTTP, Service Bus, CosmosDB and Blo
 
 Disclaimer, all these examples are trivial and contrived, none even resemble a prototype. 
 
-====== Trigger Movie Process 
+==== Trigger Movie Process 
 .
 image:azure_functions/part1/seq1.png[]
 
