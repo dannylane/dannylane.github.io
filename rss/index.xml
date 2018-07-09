@@ -1,4 +1,218 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Tue, 04 Apr 2017 08:02:58 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013]]></title><description><![CDATA[<div class="paragraph">
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Danny Lane]]></title><description><![CDATA[Notes To _Self]]></description><link>https://dannylane.github.io</link><image><url>https://github.com/dannylane/dannylane.github.io/raw/master/images/zoom.png</url><title>Danny Lane</title><link>https://dannylane.github.io</link></image><generator>RSS for Node</generator><lastBuildDate>Mon, 09 Jul 2018 21:10:53 GMT</lastBuildDate><atom:link href="https://dannylane.github.io/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[Azure Functions with...]]></title><description><![CDATA[<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Serverless technologies are an area of cloud computing that I find very interesting, particularly the Function As A Service paradigm.</p>
+</div>
+<div class="paragraph">
+<p>Products like <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> and <a href="https://azure.microsoft.com/en-us/services/functions/">Azure Functions</a> have been around for a number of years now, and have had some pretty compelling use cases from the outset.</p>
+</div>
+<div class="paragraph">
+<p>Everything from on prem cron jobs that need servers to live on, up to entire restful APIs are commonly finding new homes on these FAAS platforms.</p>
+</div>
+<div class="paragraph">
+<p>Seeing features like <a href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/">Jobs</a> and <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJobs</a> in Kubernetes further backs up the feeling that that these 'write once, run occasionally' frameworks are have touched upon a genuine need in the industry and are not just an interesting technical solution looking for a problem.</p>
+</div>
+<div class="paragraph">
+<p>I set up a pretty trivial data ingest pipeline to try out some of the different ways that Azure Functions interacts with some of the other cloud primitives offered by Microsoft.</p>
+</div>
+<div class="paragraph">
+<p>The pipeline is made up of a number of azure functions, and some of these functions interact with <a href="https://azure.microsoft.com/en-us/services/service-bus/">Azure Service Bus</a>, <a href="https://azure.microsoft.com/en-us/services/storage/blobs/">Azure Blob Storage</a>, <a href="https://azure.microsoft.com/en-us/services/cosmos-db/">Azure CosmosDB</a> and plain old <a href="https://httpstatuses.com/418">HTTP</a>.</p>
+</div>
+<div class="paragraph">
+<p>At a high level the pipeline has a trigger that initiates the flow with a Service Bus event. The second step downloads a csv with data on 5,000 movies and puts it to blob storage. In step 3 that csv is parsed and the data fired for as individual messages into another Service Bus queue. The last step in the pipeline ingests those messages with movie data and inserts them into a CosmosDB instance.</p>
+</div>
+<div class="paragraph">
+<p>There is a 5th function that is exposed as a simple search API and is integrated with a static site served by Azure CDN.</p>
+</div>
+<div class="paragraph">
+<p>In this first article I&#8217;m going to go through the first 2 steps, triggering the data flow and getting the CSV into Blob Storage.</p>
+</div>
+</div>
+</div>
+<div class="sect5">
+<h6 id="_bindings">Bindings</h6>
+<div class="paragraph">
+<p>Defore I get into the code I should call out the <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings">bindings and triggers</a> that Azure provides for interacting with Functions. There is a <a href="https://github.com/Azure/azure-functions-host/wiki/function.json">function.json</a> file that defines the configuration for a Function. The bindings sesiont of this json file tells Azure how the Function should be triggered and how it&#8217;s output should be treated. Theres a simple example here:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+   "bindings":[
+      {
+         "queueName":"testqueue",
+         "connection":"MyServiceBusConnection",
+         "name":"myQueueItem",
+         "type":"serviceBusTrigger",
+         "direction":"in"
+      }
+   ],
+   "disabled":false
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Depending on SDK you are using (C# here but the Java SDK is very similar) the bindings into a Function can be autogenerated from attributes on the parameters. A future version of the runtime will remove the need for having the bindings section and the just the attributes will be used.</p>
+</div>
+<div class="paragraph">
+<p>The bindings list <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings#supported-bindings">here</a> gives a good view as to what is supported for interacting with other Azure products. The HTTP and Timer are probably the two simplest bindings.</p>
+</div>
+<div class="paragraph">
+<p>In my examples below I&#8217;m mostly working with HTTP, Service Bus, CosmosDB and Blob inputs/outputs.</p>
+</div>
+<div class="paragraph">
+<p>Disclaimer, all these examples are trivial and contrived, none even resemble a prototype.</p>
+</div>
+</div>
+<div class="sect5">
+<h6 id="_trigger_movie_process">Trigger Movie Process</h6>
+<div class="paragraph">
+<p>.
+<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/seq1.png" alt="seq1.png"></span></p>
+</div>
+<div class="paragraph">
+<p>The first Azure Function is triggered by a HTTP call and sends an event to Service Bus when the function is triggered.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-csharp" data-lang="csharp">[FunctionName("TriggerMovieProcess")]
+public static IActionResult Run(
+	[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]HttpRequest req,
+	[ServiceBus("TriggerMovieProcessQueue", Connection = "QueueConnectionString")] ICollector&lt;string&gt; outputServiceBus,
+	TraceWriter log
+)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Input</strong></p>
+</div>
+<div class="paragraph">
+<p>The HTTPTrigger attribute on the req param tells Azure that this function should be exposed as a HTTP endpoint, the HttpRequest is available in the req object, allowing you full access to headers, form data, etc.
+r
+<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/invoke_http_function.png" alt="invoke http function.png"></span></p>
+</div>
+<div class="paragraph">
+<p><strong>Output</strong></p>
+</div>
+<div class="paragraph">
+<p>The ServiceBus attribute allows you to add messages to the Service Bus queue defined by the name and connection string in the attribute properties.</p>
+</div>
+<div class="paragraph">
+<p>To get the service bus binding you need the following <a href="https://www.nuget.org/packages/Microsoft.Azure.WebJobs.ServiceBus/3.0.0-beta5">nuget</a> package</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-csharp" data-lang="csharp">string name = req.Query["name"];
+outputServiceBus.Add(JsonConvert.SerializeObject(
+	new StartMovieProcess
+	{
+		TriggeredBy = name,
+		TriggeredOn = DateTime.UtcNow.ToString()
+	}));
+
+return name != null
+? (ActionResult)new OkObjectResult($"Triggered by {name}")
+: new BadRequestObjectResult("Send a name to trigger");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I take a name from the query string and populate a StartMovieProcess object that I add to the queue.</p>
+</div>
+<div class="paragraph">
+<p>The method returns a Http response to sattisfy the http request.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/trigger_movie_process_log.png" alt="trigger movie process log.png"></span></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_download_movie_data">Download movie data</h4>
+<div class="paragraph">
+<p><span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/seq2.png" alt="seq2.png"></span></p>
+</div>
+<div class="paragraph">
+<p>The second Function in the pipeline is triggered by any message in the <em>TriggerMovieProcessQueue</em>.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/download_movie_data_log.png" alt="download movie data log.png"></span></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-csharp" data-lang="csharp">[FunctionName("DownloadMovieData")]
+public static async Task Run(
+	[ServiceBusTrigger("TriggerMovieProcessQueue", Connection = "QueueConnectionString")]string triggerEventJson,
+	[BlobAttribute("moviedemo/%moviedata_file_name%", FileAccess.Write)] ICloudBlob blob,
+	TraceWriter log)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The ServiceBusTrigger Attribute tells Azure to invoke this function whenever messages are sent to the queue configured by the properties. The triggerEventJson will contain the data from the message. I could probably have used a strongly typed domain object here instead of flattened json but I haven&#8217;t tried it.</p>
+</div>
+<div class="paragraph">
+<p>The output here is going to be a blob that I upload a file to.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-csharp" data-lang="csharp">StartMovieProcess triggerEvent = JsonConvert.DeserializeObject&lt;StartMovieProcess&gt;(triggerEventJson);
+
+blob.Metadata.Add("TriggeredBy",triggerEvent.TriggeredBy);
+blob.Metadata.Add("TriggeredOn",triggerEvent.TriggeredOn);
+
+var uri = "https://github.com/yash91sharma/IMDB-Movie-Dataset-Analysis/blob/master/movie_metadata.csv?raw=true";
+
+using (var httpClient = new HttpClient())
+using (var responseStream = httpClient.GetStreamAsync(new Uri(uri)))
+{
+	await blob.UploadFromStreamAsync(responseStream.Result);
+}
+
+return;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the snippet above I grab the data from a CSV hosted on github and upload it to the blob on Azure Storage.</p>
+</div>
+<div class="paragraph">
+<p>I added a couple of Metadata values to the blob form the message just to show how easy it is to push these attributes with the blob.</p>
+</div>
+<div class="paragraph">
+<p>Once the file is uploaded this second function ends.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/blob_metadata_portal.png" alt="blob metadata portal.png"></span></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_setup_for_local_development">Setup for local development</h4>
+<div class="paragraph">
+<p>If you are using <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs">Visual Studio</a> you benefit from the tight developer experience that MS offer, in this article I&#8217;ll be using VS Code on Ubuntu.</p>
+</div>
+<div class="paragraph">
+<p>The <a href="https://github.com/Microsoft/vscode-azurefunctions">Azure Function extension</a> for VSCode is definitely worth looking into.
+<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/functions_extension_vscode.png" alt="functions extension vscode.png"></span></p>
+</div>
+<div class="paragraph">
+<p>To run the functions locally you will need the sdk <a href="https://www.nuget.org/packages/Microsoft.NET.Sdk.Functions">nuget</a> package and the Azure Functions <a href="https://github.com/Azure/azure-functions-core-tools">Core Tools</a> which offers a local runtime for Functions.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_running_the_functions">Running the Functions</h4>
+<div class="paragraph">
+<p>Running the functions on the local Function host is the same as running any other application once you have the prerequisites above setup.</p>
+</div>
+<div class="paragraph">
+<div class="title">Who doesn&#8217;t love ascii art?</div>
+<p><span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/host.png" alt="host.png"></span></p>
+</div>
+<div class="paragraph">
+<p>The runtime gives some good logs around which Functions have been detected:
+<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/detecting_functions.png" alt="detecting functions.png"></span>
+URLs HTTP triggered Functions can be invoked from:
+<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/http_trigger_functions.png" alt="http trigger functions.png"></span></p>
+</div>
+<div class="paragraph">
+<p>That’s all I&#8217;m going to cover in this part, in the next article I&#8217;ll look at Functions that process the blob and Write to CosmosDB</p>
+</div>
+</div>]]></description><link>https://dannylane.github.io/2017/07/10/Azure-Functions-with.html</link><guid isPermaLink="true">https://dannylane.github.io/2017/07/10/Azure-Functions-with.html</guid><category><![CDATA[Azure]]></category><category><![CDATA[ Functions]]></category><category><![CDATA[ Serverless]]></category><category><![CDATA[ ServiceBus]]></category><dc:creator><![CDATA[Danny Lane]]></dc:creator><pubDate>Mon, 10 Jul 2017 00:00:00 GMT</pubDate></item><item><title><![CDATA[Preventing failing TFS builds from entering the continuous delivery pipeline - TFS 2013]]></title><description><![CDATA[<div class="paragraph">
 <p><strong>TL;DR;</strong> Updating a TFS Build process to reorder test execution before automated release</p>
 </div>
 <div class="paragraph">
