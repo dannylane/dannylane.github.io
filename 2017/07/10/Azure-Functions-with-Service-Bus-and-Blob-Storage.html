@@ -25,7 +25,7 @@
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/apple-touch-icon-precomposed.png" rel="apple-touch-icon">
 
-    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1531171131312" />
+    <link rel="stylesheet" type="text/css" href="//dannylane.github.io/themes/uno/assets/css/uno.css?v=1531171462474" />
 
     <link rel="canonical" href="https://dannylane.github.io/2017/07/10/Azure-Functions-with-Service-Bus-and-Blob-Storage.html" />
     <meta name="referrer" content="origin" />
@@ -233,9 +233,10 @@ public static IActionResult Run(
 <p><strong>Input</strong></p>
 </div>
 <div class="paragraph">
-<p>The HTTPTrigger attribute on the req param tells Azure that this function should be exposed as a HTTP endpoint, the HttpRequest is available in the req object, allowing you full access to headers, form data, etc.
-r
-<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/invoke_http_function.png" alt="invoke http function.png"></span></p>
+<p>The HTTPTrigger attribute on the req param tells Azure that this function should be exposed as a HTTP endpoint, the HttpRequest is available in the req object, allowing you full access to headers, form data, etc.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/invoke_http_function.png" alt="invoke http function.png"></span></p>
 </div>
 <div class="paragraph">
 <p><strong>Output</strong></p>
@@ -352,8 +353,10 @@ return;</code></pre>
 </div>
 <div class="paragraph">
 <p>The runtime gives some good logs around which Functions have been detected:
-<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/detecting_functions.png" alt="detecting functions.png"></span>
-URLs HTTP triggered Functions can be invoked from:
+<span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/detecting_functions.png" alt="detecting functions.png"></span></p>
+</div>
+<div class="paragraph">
+<p>URLs HTTP triggered Functions can be invoked from:
 <span class="image"><img src="https://dannylane.github.io/images/azure_functions/part1/http_trigger_functions.png" alt="http trigger functions.png"></span></p>
 </div>
 <div class="paragraph">
@@ -404,7 +407,7 @@ URLs HTTP triggered Functions can be invoked from:
         hljs.initHighlightingOnLoad();
       </script>
 
-    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1531171131312"></script>
+    <script type="text/javascript" src="//dannylane.github.io/themes/uno/assets/js/main.js?v=1531171462474"></script>
     
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
