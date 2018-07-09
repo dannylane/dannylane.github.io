@@ -1,4 +1,4 @@
-= Azure Functions with...
+= Azure Functions with ServiceBus and Blob Storage
 :published_at: 2017-07-10
 :hp-tags: Azure, Functions, Serverless, ServiceBus
 
