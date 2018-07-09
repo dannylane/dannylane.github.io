@@ -67,7 +67,7 @@ public static IActionResult Run(
 *Input*
 
 The HTTPTrigger attribute on the req param tells Azure that this function should be exposed as a HTTP endpoint, the HttpRequest is available in the req object, allowing you full access to headers, form data, etc.  
-r
+
 image:azure_functions/part1/invoke_http_function.png[]
 
 *Output*
@@ -161,6 +161,7 @@ image:azure_functions/part1/host.png[]
 
 The runtime gives some good logs around which Functions have been detected:
 image:azure_functions/part1/detecting_functions.png[]
+
 URLs HTTP triggered Functions can be invoked from:
 image:azure_functions/part1/http_trigger_functions.png[]
 
