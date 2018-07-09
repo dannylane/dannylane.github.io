@@ -49,7 +49,6 @@ In my examples below I'm mostly working with HTTP, Service Bus, CosmosDB and Blo
 Disclaimer, all these examples are trivial and contrived, none even resemble a prototype. 
 
 ====== Trigger Movie Process 
-
 .
 image:azure_functions/part1/seq1.png[]
 
@@ -68,6 +67,8 @@ public static IActionResult Run(
 *Input*
 
 The HTTPTrigger attribute on the req param tells Azure that this function should be exposed as a HTTP endpoint, the HttpRequest is available in the req object, allowing you full access to headers, form data, etc.  
+r
+image:azure_functions/part1/invoke_http_function.png[]
 
 *Output*
 
@@ -94,11 +95,15 @@ I take a name from the query string and populate a StartMovieProcess object that
 
 The method returns a Http response to sattisfy the http request. 
 
+image:azure_functions/part1/trigger_movie_process_log.png[]
+
 ==== Download movie data 
 
 image:azure_functions/part1/seq2.png[]
 
 The second Function in the pipeline is triggered by any message in the _TriggerMovieProcessQueue_. 
+
+image:azure_functions/part1/download_movie_data_log.png[]
 
 [source, csharp]
 ----
@@ -137,6 +142,8 @@ I added a couple of Metadata values to the blob form the message just to show ho
 
 Once the file is uploaded this second function ends. 
 
+image:azure_functions/part1/blob_metadata_portal.png[]
+
 ==== Setup for local development 
 
 If you are using https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs[Visual Studio] you benefit from the tight developer experience that MS offer, in this article I'll be using VS Code on Ubuntu. 
@@ -152,9 +159,9 @@ Running the functions on the local Function host is the same as running any othe
 .Who doesn't love ascii art?
 image:azure_functions/part1/host.png[]
 
-The runtime gives some good logs around which Functions have been detected and what URLs HTTP triggered Functions can be invoked from. 
-
+The runtime gives some good logs around which Functions have been detected:
 image:azure_functions/part1/detecting_functions.png[]
+URLs HTTP triggered Functions can be invoked from:
 image:azure_functions/part1/http_trigger_functions.png[]
 
 That’s all I'm going to cover in this part, in the next article I'll look at Functions that process the blob and Write to CosmosDB 
